@@ -1,18 +1,19 @@
 
 // ============================================
-// WEATHER INTELLIGENCE 2.0
-// Weather + Air Quality + Forecasts
+// WEATHER INTELLIGENCE 3.0
+// Weather + Air Quality + Forecasts + 3D Earth
 // Data: Open-Meteo
+// Globe: Globe.gl
 // ============================================
 
 const WEATHER_API = "https://api.open-meteo.com/v1/forecast";
 const AIR_API = "https://air-quality-api.open-meteo.com/v1/air-quality";
 const GEO_API = "https://geocoding-api.open-meteo.com/v1/search";
 
-// ============================================
-// APP STATE
-// ============================================
+const EARTH_TEXTURE =
+  "https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg";
 
+// App state
 let currentPlace = {
   name: "Helsinki",
   country: "Finland",
@@ -25,12 +26,18 @@ let airData = null;
 let useCelsius = true;
 let favorites = loadFavorites();
 
+// Request counters prevent outdated searches or API responses
+// from replacing the newest selected location.
 let dashboardRequestId = 0;
 let citySearchRequestId = 0;
 
+// Globe state
+let earthGlobe = null;
+let earthInitialized = false;
+let earthResizeHandler = null;
+
 // ============================================
-// HTML ELEMENTS
-// IMPORTANT: IDs MUST MATCH index.html
+// ELEMENTS
 // ============================================
 
 const $ = (id) => document.getElementById(id);
@@ -253,10 +260,7 @@ async function fetchWeather(place = currentPlace) {
     ].join(",")
   });
 
-  const response = await fetch(
-    `${WEATHER_API}?${params}`,
-    { signal: AbortSignal.timeout(15000) }
-  );
+  const response = await fetch(`${WEATHER_API}?${params}`);
 
   if (!response.ok) {
     throw new Error("Could not retrieve weather data.");
@@ -287,10 +291,7 @@ async function fetchAirQuality(place = currentPlace) {
     ].join(",")
   });
 
-  const response = await fetch(
-    `${AIR_API}?${params}`,
-    { signal: AbortSignal.timeout(15000) }
-  );
+  const response = await fetch(`${AIR_API}?${params}`);
 
   if (!response.ok) {
     throw new Error("Air quality service is temporarily unavailable.");
@@ -310,7 +311,6 @@ async function loadDashboard() {
   const place = { ...currentPlace };
 
   setStatus("Updating weather intelligence...");
-
   dashboard.classList.add("hidden");
 
   weatherData = null;
@@ -324,7 +324,7 @@ async function loadDashboard() {
   if (requestId !== dashboardRequestId) return;
 
   if (results[0].status === "rejected") {
-    console.error("Weather error:", results[0].reason);
+    console.error(results[0].reason);
 
     setStatus(
       "Weather could not be loaded. Please try another city or refresh.",
@@ -340,11 +340,10 @@ async function loadDashboard() {
     airData = results[1].value;
   } else {
     airData = null;
-    console.error("Air quality error:", results[1].reason);
+    console.error(results[1].reason);
   }
 
   renderDashboard();
-
   dashboard.classList.remove("hidden");
 
   if (airData) {
@@ -371,6 +370,9 @@ function renderDashboard() {
   renderFavorites();
   updateFavoriteButton();
   updateWeatherEffects();
+
+  // Update the Earth whenever the selected city changes.
+  updateEarthLocation();
 }
 
 // ============================================
@@ -422,11 +424,8 @@ function renderCurrentWeather() {
 function renderSunAndUV() {
   const daily = weatherData.daily;
 
-  $("sunrise").textContent =
-    formatTime(daily.sunrise[0]);
-
-  $("sunset").textContent =
-    formatTime(daily.sunset[0]);
+  $("sunrise").textContent = formatTime(daily.sunrise[0]);
+  $("sunset").textContent = formatTime(daily.sunset[0]);
 
   const uv = daily.uv_index_max[0] ?? 0;
 
@@ -598,13 +597,11 @@ function renderTemperatureChart() {
   const range = Math.max(max - min, 1);
 
   const points = values.map((value, index) => {
-    const x = padding + (
-      index / (values.length - 1)
-    ) * (width - padding * 2);
+    const x = padding +
+      (index / (values.length - 1)) * (width - padding * 2);
 
-    const y = height - padding - (
-      (value - min) / range
-    ) * (height - padding * 2);
+    const y = height - padding -
+      ((value - min) / range) * (height - padding * 2);
 
     return { x, y, value };
   });
@@ -626,16 +623,11 @@ function renderTemperatureChart() {
     <path class="chart-area" d="${area}"></path>
     <path class="chart-line" d="${line}"></path>
 
-    ${points
-      .filter((_, i) => i % 3 === 0 || i === points.length - 1)
-      .map(point => `
-        <circle class="chart-point"
-          cx="${point.x}"
-          cy="${point.y}"
-          r="4">
-          <title>${temperature(point.value)}</title>
-        </circle>
-      `).join("")}
+    ${points.filter((_, i) => i % 3 === 0 || i === points.length - 1).map(point =>
+      `<circle class="chart-point" cx="${point.x}" cy="${point.y}" r="4">
+        <title>${temperature(point.value)}</title>
+      </circle>`
+    ).join("")}
   `;
 
   const labels = [0, 6, 12, 18, 23];
@@ -670,7 +662,6 @@ function renderDaily() {
       <span class="day-name">${formatDay(date, index)}</span>
       <span class="day-icon" title="${description}">${icon}</span>
       <span class="day-condition">${description}</span>
-
       <span class="day-temps">
         ${temperature(daily.temperature_2m_max[index])}
         <span>${temperature(daily.temperature_2m_min[index])}</span>
@@ -713,52 +704,181 @@ function renderDetails() {
 
 function updateWeatherEffects() {
   const effects = $("weather-effects");
-
   effects.innerHTML = "";
 
   if (!weatherData) return;
 
-  // Respect the visitor's reduced-motion preference.
-  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-    return;
-  }
-
   const code = weatherData.current.weather_code;
 
-  const rainCodes = [
-    51, 53, 55, 56, 57, 61, 63, 65,
-    66, 67, 80, 81, 82, 95, 96, 99
-  ];
-
-  const snowCodes = [71, 73, 75, 77, 85, 86];
-
-  if (rainCodes.includes(code)) {
+  // Rain effects
+  if ([51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82, 95, 96, 99].includes(code)) {
     for (let i = 0; i < 45; i++) {
       const drop = document.createElement("span");
-
       drop.className = "raindrop";
       drop.style.left = `${Math.random() * 100}%`;
       drop.style.animationDuration = `${0.6 + Math.random() * 0.8}s`;
       drop.style.animationDelay = `${Math.random() * 2}s`;
-
       effects.appendChild(drop);
     }
   }
 
-  if (snowCodes.includes(code)) {
+  // Snow effects
+  if ([71, 73, 75, 77, 85, 86].includes(code)) {
     for (let i = 0; i < 35; i++) {
       const snow = document.createElement("span");
-
       snow.className = "snowflake";
       snow.textContent = "❄";
       snow.style.left = `${Math.random() * 100}%`;
       snow.style.animationDuration = `${5 + Math.random() * 8}s`;
       snow.style.animationDelay = `${Math.random() * 5}s`;
       snow.style.fontSize = `${8 + Math.random() * 10}px`;
-
       effects.appendChild(snow);
     }
   }
+}
+
+// ============================================
+// 3D EARTH EXPLORER
+// ============================================
+
+function initEarth() {
+  const globeContainer = $("earth-globe");
+
+  if (!globeContainer) {
+    console.warn("Earth globe container was not found.");
+    return;
+  }
+
+  if (earthInitialized) {
+    updateEarthLocation();
+    return;
+  }
+
+  if (typeof Globe !== "function") {
+    console.warn(
+      "Globe.gl did not load. Check the Globe.gl script in index.html."
+    );
+
+    const mode = $("earth-mode");
+    if (mode) mode.textContent = "3D globe unavailable";
+
+    return;
+  }
+
+  try {
+    earthGlobe = Globe()(globeContainer)
+      .globeImageUrl(EARTH_TEXTURE)
+      .backgroundColor("rgba(0,0,0,0)")
+      .showAtmosphere(true)
+      .atmosphereColor("#7caaff")
+      .atmosphereAltitude(0.18)
+      .pointAltitude(0.025)
+      .pointRadius(0.65)
+      .pointColor(() => "#ffbd72")
+      .pointResolution(24)
+      .pointsData([])
+      .pointLabel(point => point.label || "Selected location")
+      .width(globeContainer.clientWidth)
+      .height(globeContainer.clientHeight);
+
+    // Set initial camera position and zoom.
+    earthGlobe.pointOfView({
+      lat: currentPlace.latitude,
+      lng: currentPlace.longitude,
+      altitude: 2.1
+    }, 0);
+
+    // Enable natural globe controls.
+    const controls = earthGlobe.controls();
+
+    controls.autoRotate = true;
+    controls.autoRotateSpeed = 0.35;
+    controls.enableZoom = true;
+    controls.minDistance = 120;
+    controls.maxDistance = 500;
+
+    earthInitialized = true;
+
+    // Update size when the browser window changes size.
+    earthResizeHandler = () => {
+      if (!earthGlobe || !globeContainer) return;
+
+      earthGlobe
+        .width(globeContainer.clientWidth)
+        .height(globeContainer.clientHeight);
+    };
+
+    window.addEventListener("resize", earthResizeHandler);
+
+    updateEarthLocation();
+
+  } catch (error) {
+    console.error("Could not initialize the 3D Earth:", error);
+
+    const mode = $("earth-mode");
+    if (mode) mode.textContent = "Globe initialization failed";
+  }
+}
+
+function updateEarthLocation() {
+  const cityElement = $("earth-city");
+  const countryElement = $("earth-country");
+  const latitudeElement = $("earth-lat");
+  const longitudeElement = $("earth-lon");
+  const modeElement = $("earth-mode");
+
+  if (cityElement) {
+    cityElement.textContent = currentPlace.name;
+  }
+
+  if (countryElement) {
+    countryElement.textContent = currentPlace.country || "Selected location";
+  }
+
+  if (latitudeElement) {
+    latitudeElement.textContent =
+      `${Number(currentPlace.latitude).toFixed(4)}°`;
+  }
+
+  if (longitudeElement) {
+    longitudeElement.textContent =
+      `${Number(currentPlace.longitude).toFixed(4)}°`;
+  }
+
+  if (!earthInitialized || !earthGlobe) {
+    initEarth();
+    return;
+  }
+
+  const isDay = weatherData?.current?.is_day === 1;
+
+  if (modeElement) {
+    modeElement.textContent = isDay
+      ? "☀ Local daytime"
+      : "🌙 Local nighttime";
+  }
+
+  // Change globe appearance slightly based on local daytime.
+  earthGlobe
+    .globeImageUrl(EARTH_TEXTURE)
+    .atmosphereColor(isDay ? "#91caff" : "#5369b8")
+    .atmosphereAltitude(isDay ? 0.19 : 0.13);
+
+  // Move the globe's focus to the selected city.
+  earthGlobe.pointOfView({
+    lat: currentPlace.latitude,
+    lng: currentPlace.longitude,
+    altitude: 2.1
+  }, 1200);
+
+  // Add a marker at the selected city's coordinates.
+  earthGlobe.pointsData([
+    {
+      lat: currentPlace.latitude,
+      lng: currentPlace.longitude,
+      label: `${currentPlace.name}, ${currentPlace.country}`
+    }
+  ]);
 }
 
 // ============================================
@@ -767,11 +887,9 @@ function updateWeatherEffects() {
 
 async function searchCity(city) {
   const query = city.trim();
-
   if (!query) return;
 
   const searchRequestId = ++citySearchRequestId;
-
   setStatus(`Searching for ${query}...`);
 
   try {
@@ -782,10 +900,7 @@ async function searchCity(city) {
       format: "json"
     });
 
-    const response = await fetch(
-      `${GEO_API}?${params}`,
-      { signal: AbortSignal.timeout(15000) }
-    );
+    const response = await fetch(`${GEO_API}?${params}`);
 
     if (!response.ok) {
       throw new Error("City search failed.");
@@ -813,12 +928,8 @@ async function searchCity(city) {
   } catch (error) {
     if (searchRequestId !== citySearchRequestId) return;
 
-    console.error("City search error:", error);
-
-    setStatus(
-      error.message || "Could not search for that city.",
-      true
-    );
+    console.error(error);
+    setStatus(error.message || "Could not search for that city.", true);
   }
 }
 
@@ -828,10 +939,7 @@ async function searchCity(city) {
 
 function useMyLocation() {
   if (!navigator.geolocation) {
-    setStatus(
-      "Location services are not supported by this browser.",
-      true
-    );
+    setStatus("Location services are not supported by this browser.", true);
     return;
   }
 
@@ -853,11 +961,7 @@ function useMyLocation() {
       let message = "Unable to access your location.";
 
       if (error.code === error.PERMISSION_DENIED) {
-        message =
-          "Location permission was denied. You can search for a city instead.";
-      } else if (error.code === error.TIMEOUT) {
-        message =
-          "Location request timed out. Please try again.";
+        message = "Location permission was denied. You can search for a city instead.";
       }
 
       setStatus(message, true);
@@ -973,7 +1077,6 @@ function toggleUnit() {
 // ============================================
 
 function startWeatherApp() {
-  // Check that the HTML and JavaScript belong together.
   const requiredElements = {
     "search-form": searchForm,
     "city-input": cityInput,
@@ -1005,10 +1108,6 @@ function startWeatherApp() {
     return;
   }
 
-  // CORRECTED IDs:
-  // search-form instead of searchForm
-  // city-input instead of cityInput
-
   searchForm.addEventListener("submit", (event) => {
     event.preventDefault();
     searchCity(cityInput.value);
@@ -1020,6 +1119,10 @@ function startWeatherApp() {
   favoriteButton.addEventListener("click", toggleFavorite);
 
   renderFavorites();
+
+  // Initialize the globe once the page elements exist.
+  initEarth();
+
   loadDashboard();
 }
 
