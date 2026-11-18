@@ -189,7 +189,6 @@ async function loadCity(query) {
 
   try {
     const city = await searchCity(query.trim());
-
     await loadWeather(city);
   } catch (error) {
     console.error(error);
@@ -363,6 +362,7 @@ function renderUV(value) {
   setText("uv-advice", advice);
 
   const meter = $("uv-meter");
+
   if (meter) {
     meter.style.width = `${Math.min(100, (uv / 11) * 100)}%`;
   }
@@ -389,6 +389,7 @@ function renderHourly() {
 
   container.innerHTML = items.map((time, index) => {
     const i = startIndex + index;
+
     const info = getWeatherInfo(
       hourly.weather_code[i],
       hourly.is_day?.[i] === 1
@@ -797,29 +798,36 @@ function initEarth() {
 
   if (typeof maplibregl === "undefined") {
     console.error("MapLibre GL JS did not load. Check the MapLibre script in index.html.");
+
     container.innerHTML = `
       <div class="empty-state">
         Earth globe could not load. Check your internet connection and MapLibre script.
       </div>
     `;
+
     return;
   }
 
   try {
     state.map = new maplibregl.Map({
       container: "earth-globe",
+
       style: {
         version: 8,
+
         sources: {
           satellite: {
             type: "raster",
+
             tiles: [
               "https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2020_3857/default/g/{z}/{y}/{x}.jpg"
             ],
+
             tileSize: 256,
             attribution: "Satellite imagery © EOX"
           }
         },
+
         layers: [
           {
             id: "satellite-layer",
@@ -829,10 +837,12 @@ function initEarth() {
             maxzoom: 18
           }
         ],
+
         projection: {
           type: "globe"
         }
       },
+
       center: [0, 20],
       zoom: 1.4,
       minZoom: 1,
@@ -848,16 +858,32 @@ function initEarth() {
       "top-right"
     );
 
+    /* =====================================
+       FIXED GLOBE ATMOSPHERE
+
+       MapLibre uses setSky().
+       Do NOT use setFog() here.
+    ===================================== */
+
     state.map.on("load", () => {
       state.mapReady = true;
 
       try {
-        state.map.setFog({
-          color: "rgb(10, 20, 35)",
-          "high-color": "rgb(30, 75, 120)",
-          "space-color": "rgb(3, 8, 18)",
-          "star-intensity": 0.25
-        });
+        if (typeof state.map.setSky === "function") {
+          state.map.setSky({
+            "sky-color": "rgb(3, 8, 18)",
+            "horizon-color": "rgb(30, 75, 120)",
+            "fog-color": "rgb(10, 20, 35)",
+            "fog-ground-blend": 0.5,
+            "horizon-fog-blend": 0.5,
+            "sky-horizon-blend": 0.5,
+            "atmosphere-blend": 1.0
+          });
+        } else {
+          console.warn(
+            "This MapLibre version does not support setSky(). Globe atmosphere was skipped."
+          );
+        }
       } catch (error) {
         console.warn("Globe atmosphere could not be enabled:", error);
       }
@@ -873,6 +899,7 @@ function initEarth() {
 
   } catch (error) {
     console.error("Could not initialize the Earth globe:", error);
+
     container.innerHTML = `
       <div class="empty-state">
         Unable to initialize the Earth globe.
@@ -880,6 +907,10 @@ function initEarth() {
     `;
   }
 }
+
+/* =========================================
+   UPDATE EARTH LOCATION
+========================================= */
 
 function updateEarthLocation(city) {
   if (!city) return;
@@ -969,7 +1000,11 @@ async function startWeatherApp() {
     await loadWeather(defaultCity);
   } catch (error) {
     console.error("Initial weather load failed:", error);
-    setStatus("Weather could not be loaded. Search for a city to try again.", "error");
+
+    setStatus(
+      "Weather could not be loaded. Search for a city to try again.",
+      "error"
+    );
   }
 }
 
