@@ -1,0 +1,207 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b0b10">
+  <meta name="description" content="Weather Intelligence — live conditions, hourly outlook and a seven-day forecast. An experiment by Ayush Pandey.">
+
+  <title>Weather Intelligence | Ayush's Digital Lab</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="./style.css">
+  <script src="./app.js" defer></script>
+</head>
+
+<body>
+  <div class="page-glow" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <a class="brand" href="../../" aria-label="Back to Ayush's website">
+      ayush<span>.</span>
+    </a>
+
+    <div class="topbar-right">
+      <span class="lab-label">DIGITAL LAB <i></i> EXPERIMENT 04</span>
+      <a class="back-link" href="../../">← Back to portfolio</a>
+    </div>
+  </header>
+
+  <main class="shell">
+
+    <section class="intro">
+      <p class="eyebrow">LIVE DATA · WEATHER INTELLIGENCE</p>
+
+      <h1>Weather, <span>in perspective.</span></h1>
+
+      <p class="intro-copy">
+        A little weather station for the whole planet.
+        Look up a place, explore the next hours, and see
+        what the week has in store.
+      </p>
+    </section>
+
+    <section class="search-panel" aria-label="Find a location">
+
+      <form id="searchForm" class="search-form">
+        <label class="sr-only" for="cityInput">Search city</label>
+
+        <span class="search-icon" aria-hidden="true">⌕</span>
+
+        <input
+          id="cityInput"
+          type="search"
+          placeholder="Search a city — e.g. Helsinki, Kathmandu..."
+          autocomplete="off"
+          required
+        >
+
+        <button class="search-button" type="submit">
+          Explore <span>↗</span>
+        </button>
+      </form>
+
+      <button class="location-button" id="locationButton" type="button">
+        <span aria-hidden="true">◎</span>
+        Use my location
+      </button>
+
+    </section>
+
+    <div class="status-line" id="statusLine" role="status" aria-live="polite">
+      <span class="status-dot"></span>
+      <span id="statusText">Loading weather for Helsinki...</span>
+    </div>
+
+    <section class="weather-layout" id="weatherContent" aria-busy="true">
+
+      <article class="current-card panel">
+
+        <div class="current-top">
+          <div>
+            <p class="panel-label">CURRENT CONDITIONS</p>
+            <h2 id="placeName">Helsinki</h2>
+            <p class="place-detail" id="placeDetail">Finland</p>
+          </div>
+
+          <div class="unit-switch" aria-label="Temperature units">
+            <button type="button" class="unit-button active" data-unit="c" aria-pressed="true">°C</button>
+            <button type="button" class="unit-button" data-unit="f" aria-pressed="false">°F</button>
+          </div>
+        </div>
+
+        <div class="current-main">
+          <div class="weather-symbol" id="currentIcon" aria-hidden="true">☀</div>
+
+          <div class="temperature-wrap">
+            <div class="temperature" id="currentTemp">--°</div>
+            <p id="currentDescription">Getting conditions...</p>
+          </div>
+        </div>
+
+        <p class="feels-like" id="feelsLike">Feels like --°</p>
+
+        <div class="current-stats">
+          <div class="stat">
+            <span>WIND</span>
+            <strong id="windValue">--</strong>
+          </div>
+
+          <div class="stat">
+            <span>HUMIDITY</span>
+            <strong id="humidityValue">--</strong>
+          </div>
+
+          <div class="stat">
+            <span>UV INDEX</span>
+            <strong id="uvValue">--</strong>
+          </div>
+        </div>
+
+        <div class="sun-times">
+          <div>
+            <span class="sun-icon">↗</span>
+            <span>
+              <small>SUNRISE</small>
+              <strong id="sunrise">--:--</strong>
+            </span>
+          </div>
+
+          <div>
+            <span class="sun-icon sunset">↘</span>
+            <span>
+              <small>SUNSET</small>
+              <strong id="sunset">--:--</strong>
+            </span>
+          </div>
+        </div>
+
+      </article>
+
+      <article class="forecast-card panel">
+
+        <div class="section-head">
+          <div>
+            <p class="panel-label">THE NEXT FEW HOURS</p>
+            <h2>Hourly outlook</h2>
+          </div>
+
+          <span class="section-note">NEXT 12 HOURS</span>
+        </div>
+
+        <div class="hourly-list" id="hourlyList">
+          <div class="loading-line"></div>
+          <div class="loading-line"></div>
+          <div class="loading-line"></div>
+        </div>
+
+      </article>
+
+    </section>
+
+    <section class="weekly-section panel">
+
+      <div class="section-head">
+        <div>
+          <p class="panel-label">PLAN AHEAD</p>
+          <h2>Seven-day forecast</h2>
+        </div>
+
+        <span class="section-note" id="updatedAt">LOCAL FORECAST</span>
+      </div>
+
+      <div class="week-list" id="weekList">
+        <div class="loading-line"></div>
+        <div class="loading-line"></div>
+        <div class="loading-line"></div>
+      </div>
+
+    </section>
+
+    <section class="weather-note">
+      <span class="note-mark">✳</span>
+
+      <p>
+        <strong>Weather is always changing.</strong>
+        Conditions and forecasts update when you search for a location.
+        Data provided by
+        <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo</a>.
+      </p>
+
+      <button type="button" id="refreshButton" class="refresh-button">
+        ↻ Refresh data
+      </button>
+    </section>
+
+    <footer class="footer">
+      <span>BUILT WITH CURIOSITY · EXPERIMENT 04</span>
+      <a href="../../">Return to ayush. ↗</a>
+    </footer>
+
+  </main>
+</body>
+</html>
