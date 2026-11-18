@@ -1,3 +1,4 @@
+
 :root {
   --bg: #090b18;
   --panel: rgba(20, 24, 46, .78);
@@ -302,13 +303,172 @@ h1 span { color: #a99aff; }
 .snowflake { position: absolute; top: -20px; color: rgba(255,255,255,.65); animation: snow-fall linear infinite; }
 @keyframes snow-fall { to { transform: translateY(110vh) translateX(35px) rotate(180deg); } }
 
+/* 3D EARTH EXPLORER */
+
+.earth-panel {
+  margin-top: 15px;
+  padding: 23px 25px;
+  overflow: hidden;
+}
+
+.earth-panel .section-heading {
+  margin-bottom: 12px;
+}
+
+.earth-mode {
+  color: #a99aff;
+  font-size: 10px;
+  letter-spacing: 1px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.earth-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(190px, .8fr);
+  gap: 20px;
+  align-items: center;
+}
+
+.earth-globe-wrap {
+  position: relative;
+  min-width: 0;
+  height: 390px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 17px;
+  background:
+    radial-gradient(ellipse at center, rgba(55,75,145,.22), transparent 65%),
+    #080d20;
+}
+
+#earth-globe {
+  width: 100%;
+  height: 100%;
+  min-height: 300px;
+}
+
+#earth-globe canvas {
+  display: block;
+  outline: none;
+}
+
+.earth-hint {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(210,218,255,.65);
+  background: rgba(7,10,25,.65);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 20px;
+  padding: 7px 12px;
+  font-size: 10px;
+  white-space: nowrap;
+  pointer-events: none;
+  backdrop-filter: blur(8px);
+}
+
+.earth-info {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+
+.earth-info-card {
+  padding: 17px;
+  border-radius: 14px;
+  background: rgba(255,255,255,.045);
+  border: 1px solid rgba(255,255,255,.07);
+}
+
+.earth-info-card .section-kicker {
+  display: block;
+  margin-bottom: 9px;
+}
+
+.earth-info-card h3 {
+  font: 500 21px Outfit, sans-serif;
+  margin: 0 0 5px;
+  overflow-wrap: anywhere;
+}
+
+.earth-country {
+  color: var(--muted);
+  font-size: 12px;
+  margin: 0;
+}
+
+.earth-coordinates {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.earth-coordinate {
+  padding: 13px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 12px;
+  min-width: 0;
+}
+
+.earth-coordinate span {
+  display: block;
+  color: var(--muted);
+  font-size: 9px;
+  letter-spacing: 1px;
+  margin-bottom: 7px;
+}
+
+.earth-coordinate strong {
+  font: 500 15px Outfit, sans-serif;
+  overflow-wrap: anywhere;
+}
+
+.earth-daylight {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px;
+  border-radius: 12px;
+  background: rgba(169,154,255,.08);
+  border: 1px solid rgba(169,154,255,.13);
+  color: #c9c0ff;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.earth-daylight-icon {
+  font-size: 22px;
+  flex: 0 0 auto;
+}
+
 @media (max-width: 760px) {
   .dashboard { grid-template-columns: 1fr; }
   .side-stack { grid-template-columns: 1fr 1fr; }
   .air-content { grid-template-columns: 1fr; }
   .pollutants { grid-template-columns: repeat(4,1fr); }
   .details-grid { grid-template-columns: repeat(2,1fr); }
+
+  .earth-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .earth-globe-wrap {
+    height: 350px;
+  }
+
+  .earth-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .earth-info-card:first-child {
+    grid-column: 1 / -1;
+  }
 }
+
 @media (max-width: 520px) {
   .app-shell { width: min(100% - 26px,1120px); }
   .intro { padding-top: 35px; align-items: start; flex-direction: column; }
@@ -325,7 +485,33 @@ h1 span { color: #a99aff; }
   .day-condition { display: none; }
   .footer { flex-direction: column; }
   .live-label { display: none; }
+
+  .earth-panel {
+    padding: 19px 14px;
+  }
+
+  .earth-globe-wrap {
+    height: 300px;
+  }
+
+  .earth-info {
+    grid-template-columns: 1fr;
+  }
+
+  .earth-info-card:first-child {
+    grid-column: auto;
+  }
+
+  .earth-hint {
+    font-size: 9px;
+    padding: 6px 9px;
+  }
 }
+
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
 }
