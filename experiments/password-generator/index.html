@@ -1,1 +1,551 @@
 
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#09090f">
+
+<title>Password Generator | Ayush's Lab</title>
+<meta name="description" content="Generate secure random passwords with Ayush's Lab Password Generator.">
+
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  min-height: 100vh;
+  background: #09090f;
+  color: #f4f4f8;
+  font-family: Inter, system-ui, sans-serif;
+  padding: 24px;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.nav {
+  max-width: 1100px;
+  margin: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-size: 23px;
+  font-weight: 900;
+}
+
+.logo span {
+  color: #a78bfa;
+}
+
+.back {
+  color: #b9a2ff;
+  font-size: 14px;
+}
+
+main {
+  max-width: 520px;
+  margin: 65px auto;
+}
+
+.heading {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.heading .icon {
+  font-size: 42px;
+  margin-bottom: 12px;
+}
+
+.heading h1 {
+  font-size: 32px;
+}
+
+.heading p {
+  color: #9999aa;
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+.generator {
+  background: #151520;
+  border: 1px solid #303044;
+  padding: 25px;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px #0007;
+}
+
+.label {
+  display: block;
+  font-size: 13px;
+  color: #aaaabb;
+  margin-bottom: 12px;
+}
+
+.password-box {
+  display: flex;
+  gap: 8px;
+  background: #0b0b13;
+  border: 1px solid #343448;
+  border-radius: 11px;
+  padding: 12px;
+  align-items: center;
+  margin-bottom: 22px;
+}
+
+.password-box input {
+  width: 100%;
+  min-width: 0;
+  background: transparent;
+  color: #c4b5fd;
+  border: none;
+  outline: none;
+  font-size: 16px;
+  font-family: monospace;
+}
+
+.copy-btn {
+  background: #352b50;
+  color: #c4b5fd;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 13px;
+  cursor: pointer;
+}
+
+.copy-btn:hover {
+  background: #49376d;
+}
+
+.length-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.length-value {
+  color: #c4b5fd;
+  font-weight: bold;
+}
+
+input[type="range"] {
+  width: 100%;
+  accent-color: #a78bfa;
+  cursor: pointer;
+}
+
+.options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin: 25px 0;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #d1d1df;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.option input {
+  width: 17px;
+  height: 17px;
+  accent-color: #a78bfa;
+  cursor: pointer;
+}
+
+.strength {
+  margin-bottom: 23px;
+}
+
+.strength-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  margin-bottom: 10px;
+}
+
+.strength-label {
+  color: #aaaabb;
+}
+
+.strength-value {
+  color: #fbbf24;
+}
+
+.strength-bar {
+  height: 7px;
+  background: #303044;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.strength-fill {
+  height: 100%;
+  width: 0%;
+  background: #ef4444;
+  border-radius: 20px;
+  transition: .25s;
+}
+
+.generate-btn {
+  width: 100%;
+  padding: 15px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(110deg,#805ad5,#5268d9);
+  color: white;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: .2s;
+}
+
+.generate-btn:hover {
+  opacity: .88;
+  transform: translateY(-2px);
+}
+
+.generate-btn:active {
+  transform: scale(.98);
+}
+
+.message {
+  min-height: 22px;
+  text-align: center;
+  font-size: 13px;
+  color: #8bdbac;
+  margin-top: 13px;
+}
+
+.note {
+  color: #77778a;
+  text-align: center;
+  font-size: 12px;
+  margin-top: 20px;
+}
+
+footer {
+  text-align: center;
+  color: #77778a;
+  font-size: 12px;
+  margin-top: 35px;
+}
+
+@media(max-width: 480px) {
+  body {
+    padding: 17px;
+  }
+
+  .generator {
+    padding: 19px;
+  }
+
+  .options {
+    gap: 17px 8px;
+  }
+
+  .heading h1 {
+    font-size: 27px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<nav class="nav">
+  <a href="../../" class="logo">AYUSH<span>.</span></a>
+  <a href="../../" class="back">← Back to Lab</a>
+</nav>
+
+<main>
+
+  <div class="heading">
+    <div class="icon">🔐</div>
+    <h1>Password Generator</h1>
+    <p>Create strong random passwords in seconds.</p>
+  </div>
+
+  <section class="generator">
+
+    <label class="label" for="password">
+      Your generated password
+    </label>
+
+    <div class="password-box">
+      <input
+        type="text"
+        id="password"
+        readonly
+        placeholder="Your password appears here"
+        aria-label="Generated password"
+      >
+
+      <button class="copy-btn" id="copyBtn" type="button">
+        Copy
+      </button>
+    </div>
+
+    <div class="length-header">
+      <label class="label" for="length">
+        Password length
+      </label>
+
+      <span class="length-value" id="lengthValue">16</span>
+    </div>
+
+    <input
+      type="range"
+      id="length"
+      min="8"
+      max="64"
+      value="16"
+    >
+
+    <div class="options">
+
+      <label class="option">
+        <input type="checkbox" id="uppercase" checked>
+        Uppercase (A-Z)
+      </label>
+
+      <label class="option">
+        <input type="checkbox" id="lowercase" checked>
+        Lowercase (a-z)
+      </label>
+
+      <label class="option">
+        <input type="checkbox" id="numbers" checked>
+        Numbers (0-9)
+      </label>
+
+      <label class="option">
+        <input type="checkbox" id="symbols" checked>
+        Symbols (!@#)
+      </label>
+
+    </div>
+
+    <div class="strength">
+
+      <div class="strength-header">
+        <span class="strength-label">Password strength</span>
+        <span class="strength-value" id="strengthText">
+          Not generated
+        </span>
+      </div>
+
+      <div
+        class="strength-bar"
+        role="progressbar"
+        aria-label="Password strength"
+        aria-valuemin="0"
+        aria-valuemax="4"
+        aria-valuenow="0"
+        id="strengthBar"
+      >
+        <div class="strength-fill" id="strengthFill"></div>
+      </div>
+
+    </div>
+
+    <button class="generate-btn" id="generateBtn" type="button">
+      Generate Password ↗
+    </button>
+
+    <p class="message" id="message" aria-live="polite"></p>
+
+  </section>
+
+  <p class="note">
+    🔒 Passwords are generated locally in your browser.
+    They are not sent to a server.
+  </p>
+
+  <footer>
+    Made with curiosity by Ayush Pandey 🇫🇮
+  </footer>
+
+</main>
+
+<script>
+const passwordInput = document.getElementById("password");
+const lengthInput = document.getElementById("length");
+const lengthValue = document.getElementById("lengthValue");
+const generateBtn = document.getElementById("generateBtn");
+const copyBtn = document.getElementById("copyBtn");
+const message = document.getElementById("message");
+
+const strengthText = document.getElementById("strengthText");
+const strengthFill = document.getElementById("strengthFill");
+const strengthBar = document.getElementById("strengthBar");
+
+const groups = {
+  uppercase: "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+  lowercase: "abcdefghijklmnopqrstuvwxyz",
+  numbers: "0123456789",
+  symbols: "!@#$%^&*()_+-=[]{}?"
+};
+
+// Cryptographically secure random integer, inclusive.
+function randomInt(max) {
+  if (!Number.isSafeInteger(max) || max < 1) {
+    throw new Error("Invalid random range");
+  }
+
+  const range = 0x100000000;
+  const limit = range - (range % max);
+  const values = new Uint32Array(1);
+
+  let value;
+
+  do {
+    crypto.getRandomValues(values);
+    value = values[0];
+  } while (value >= limit);
+
+  return value % max;
+}
+
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = randomInt(i + 1);
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+
+  return array;
+}
+
+function getStrength(password, selectedGroups) {
+  let score = 0;
+
+  if (password.length >= 12) score++;
+  if (password.length >= 16) score++;
+  if (selectedGroups.length >= 3) score++;
+  if (selectedGroups.length === 4 && password.length >= 12) score++;
+
+  const labels = [
+    "Weak",
+    "Fair",
+    "Good",
+    "Strong",
+    "Very Strong"
+  ];
+
+  const colors = [
+    "#ef4444",
+    "#f97316",
+    "#eab308",
+    "#22c55e",
+    "#8bdbac"
+  ];
+
+  strengthText.textContent = labels[score];
+  strengthText.style.color = colors[score];
+
+  strengthFill.style.width = ((score + 1) * 20) + "%";
+  strengthFill.style.background = colors[score];
+
+  strengthBar.setAttribute("aria-valuenow", score);
+}
+
+function generatePassword() {
+  message.textContent = "";
+
+  const length = Number(lengthInput.value);
+
+  const selectedGroups = Object.keys(groups).filter(id =>
+    document.getElementById(id).checked
+  );
+
+  if (!selectedGroups.length) {
+    message.textContent = "Please select at least one option.";
+    message.style.color = "#ff8b8b";
+    return;
+  }
+
+  if (!window.crypto || !crypto.getRandomValues) {
+    message.textContent = "Secure password generation is unavailable.";
+    message.style.color = "#ff8b8b";
+    return;
+  }
+
+  try {
+    const characters = selectedGroups
+      .map(id => groups[id])
+      .join("");
+
+    // Guarantee at least one character from each selected group.
+    const result = selectedGroups.map(id => {
+      const group = groups[id];
+      return group[randomInt(group.length)];
+    });
+
+    // Fill the remaining password length.
+    while (result.length < length) {
+      result.push(characters[randomInt(characters.length)]);
+    }
+
+    shuffle(result);
+
+    const password = result.join("");
+
+    passwordInput.value = password;
+
+    getStrength(password, selectedGroups);
+
+    message.textContent = "New password generated!";
+    message.style.color = "#8bdbac";
+
+  } catch (error) {
+    message.textContent = "Could not generate password. Try again.";
+    message.style.color = "#ff8b8b";
+  }
+}
+
+lengthInput.addEventListener("input", () => {
+  lengthValue.textContent = lengthInput.value;
+});
+
+generateBtn.addEventListener("click", generatePassword);
+
+copyBtn.addEventListener("click", async () => {
+  if (!passwordInput.value) {
+    message.textContent = "Generate a password first.";
+    message.style.color = "#ff8b8b";
+    return;
+  }
+
+  try {
+    await navigator.clipboard.writeText(passwordInput.value);
+
+    message.textContent = "Password copied successfully!";
+    message.style.color = "#8bdbac";
+
+  } catch (error) {
+    message.textContent = "Copy unavailable. Please copy manually.";
+    message.style.color = "#ff8b8b";
+  }
+});
+
+// Generate the first password automatically.
+generatePassword();
+</script>
+
+</body>
+</html>
