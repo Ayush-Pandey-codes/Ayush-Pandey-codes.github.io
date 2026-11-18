@@ -1,4 +1,3 @@
-
 // ============================================
 // WEATHER INTELLIGENCE 2.0
 // Weather + Air Quality + Forecasts
@@ -21,6 +20,11 @@ let weatherData = null;
 let airData = null;
 let useCelsius = true;
 let favorites = loadFavorites();
+
+// Request counters prevent outdated searches or API responses
+// from replacing the newest selected location.
+let dashboardRequestId = 0;
+let citySearchRequestId = 0;
 
 // ============================================
 // ELEMENTS
@@ -203,8 +207,8 @@ function getAQIInfo(aqi) {
 // FETCH WEATHER DATA
 // ============================================
 
-async function fetchWeather() {
-  const { latitude, longitude } = currentPlace;
+async function fetchWeather(place = currentPlace) {
+  const { latitude, longitude } = place;
 
   const params = new URLSearchParams({
     latitude,
@@ -250,8 +254,8 @@ async function fetchWeather() {
 // FETCH AIR QUALITY DATA
 // ============================================
 
-async function fetchAirQuality() {
-  const { latitude, longitude } = currentPlace;
+async function fetchAirQuality(place = currentPlace) {
+  const { latitude, longitude } = place;
 
   const params = new URLSearchParams({
     latitude,
@@ -281,17 +285,26 @@ async function fetchAirQuality() {
 // ============================================
 
 async function loadDashboard() {
+  // A new dashboard load invalidates any unfinished city lookup.
+  citySearchRequestId++;
+
+  const requestId = ++dashboardRequestId;
+  const place = { ...currentPlace };
+
   setStatus("Updating weather intelligence...");
   dashboard.classList.add("hidden");
 
   weatherData = null;
   airData = null;
 
-  // Load weather and air quality independently.
+  // Load weather and air quality independently for the same location.
   const results = await Promise.allSettled([
-    fetchWeather(),
-    fetchAirQuality()
+    fetchWeather(place),
+    fetchAirQuality(place)
   ]);
+
+  // Ignore responses belonging to an older location or refresh.
+  if (requestId !== dashboardRequestId) return;
 
   if (results[0].status === "rejected") {
     console.error(results[0].reason);
@@ -307,11 +320,11 @@ async function loadDashboard() {
   if (results[1].status === "fulfilled") {
     airData = results[1].value;
   } else {
+    airData = null;
     console.error(results[1].reason);
   }
 
   renderDashboard();
-
   dashboard.classList.remove("hidden");
 
   if (airData) {
@@ -702,13 +715,15 @@ function updateWeatherEffects() {
 // ============================================
 
 async function searchCity(city) {
-  if (!city.trim()) return;
+  const query = city.trim();
+  if (!query) return;
 
-  setStatus(`Searching for ${city}...`);
+  const searchRequestId = ++citySearchRequestId;
+  setStatus(`Searching for ${query}...`);
 
   try {
     const params = new URLSearchParams({
-      name: city,
+      name: query,
       count: "1",
       language: "en",
       format: "json"
@@ -721,6 +736,9 @@ async function searchCity(city) {
     }
 
     const data = await response.json();
+
+    // A newer search or location selection has taken priority.
+    if (searchRequestId !== citySearchRequestId) return;
 
     if (!data.results || data.results.length === 0) {
       throw new Error("City not found. Try another city name.");
@@ -738,6 +756,8 @@ async function searchCity(city) {
     await loadDashboard();
 
   } catch (error) {
+    if (searchRequestId !== citySearchRequestId) return;
+
     console.error(error);
     setStatus(error.message || "Could not search for that city.", true);
   }
