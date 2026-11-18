@@ -1,6 +1,7 @@
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -21,6 +22,7 @@
   <link rel="icon" href="./favicon.png">
   <link rel="stylesheet" href="./style.css">
 
+  <!-- Saved Theme -->
   <script>
     try {
       const savedTheme = localStorage.getItem("ayush-theme");
@@ -32,13 +34,18 @@
       console.warn("Theme preference unavailable.");
     }
   </script>
+
 </head>
 
 <body>
 
   <!-- NAVIGATION -->
+
   <nav class="navbar">
-    <a href="#home" class="logo">AYUSH<span>.</span></a>
+
+    <a href="#home" class="logo">
+      AYUSH<span>.</span>
+    </a>
 
     <div class="nav-links" id="navLinks">
       <a href="#about">About</a>
@@ -49,7 +56,9 @@
 
     <div class="nav-actions">
 
-      <button class="theme-toggle" id="themeToggle"
+      <button
+        class="theme-toggle"
+        id="themeToggle"
         aria-label="Switch color theme"
         title="Switch theme">
         ☀
@@ -59,7 +68,9 @@
         Explore Lab ↗
       </a>
 
-      <button class="menu-toggle" id="menuToggle"
+      <button
+        class="menu-toggle"
+        id="menuToggle"
         aria-label="Open navigation"
         aria-expanded="false"
         aria-controls="navLinks">
@@ -67,12 +78,14 @@
       </button>
 
     </div>
+
   </nav>
 
 
   <main>
 
-    <!-- HERO -->
+    <!-- HERO SECTION -->
+
     <section class="hero" id="home">
 
       <div class="hero-content">
@@ -82,7 +95,9 @@
           STUDENT · CREATOR · EXPLORER
         </div>
 
-        <p class="eyebrow">HELLO, WORLD! 👋</p>
+        <p class="eyebrow">
+          HELLO, WORLD! 👋
+        </p>
 
         <h1>
           Terve! I'm
@@ -122,10 +137,13 @@
     </section>
 
 
-    <!-- ABOUT -->
+    <!-- ABOUT SECTION -->
+
     <section class="section" id="about">
 
-      <div class="section-label">01 / ABOUT ME</div>
+      <div class="section-label">
+        01 / ABOUT ME
+      </div>
 
       <h2>
         Learning by
@@ -164,13 +182,18 @@
 
         </div>
 
+
         <div class="about-card">
 
-          <div class="profile-icon">👨‍💻</div>
+          <div class="profile-icon">
+            👨‍💻
+          </div>
 
           <h3>Ayush Pandey</h3>
 
-          <p>Student & Technology Enthusiast</p>
+          <p>
+            Student & Technology Enthusiast
+          </p>
 
           <div class="about-tags">
             <span>Technology</span>
@@ -190,10 +213,13 @@
     </section>
 
 
-    <!-- EXPERIMENTS -->
+    <!-- EXPERIMENTS SECTION -->
+
     <section class="section" id="experiments">
 
-      <div class="section-label">02 / THE PLAYGROUND</div>
+      <div class="section-label">
+        02 / THE PLAYGROUND
+      </div>
 
       <h2>
         Welcome to my
@@ -205,14 +231,18 @@
         things built while learning.
       </p>
 
+
       <div class="cards">
 
         <!-- COLOR GENERATOR -->
+
         <article class="card">
 
           <div class="card-icon">🎨</div>
 
-          <span class="card-category">DESIGN TOOL</span>
+          <span class="card-category">
+            DESIGN TOOL
+          </span>
 
           <h3>Color Playground</h3>
 
@@ -221,8 +251,9 @@
             and discover amazing combinations.
           </p>
 
-          <a href="./experiments/color-generator/"
-             class="card-link">
+          <a
+            href="./experiments/color-generator/"
+            class="card-link">
             Open Color Generator ↗
           </a>
 
@@ -230,11 +261,14 @@
 
 
         <!-- CALCULATOR -->
+
         <article class="card">
 
           <div class="card-icon">🧮</div>
 
-          <span class="card-category">JAVASCRIPT TOOL</span>
+          <span class="card-category">
+            JAVASCRIPT TOOL
+          </span>
 
           <h3>Mini Calculator</h3>
 
@@ -243,8 +277,9 @@
             and built-in calculation history.
           </p>
 
-          <a href="./experiments/calculator/"
-             class="card-link">
+          <a
+            href="./experiments/calculator/"
+            class="card-link">
             Open Calculator ↗
           </a>
 
@@ -252,33 +287,40 @@
 
 
         <!-- PASSWORD GENERATOR -->
-        
-<article class="card">
-  <div class="card-icon">🔐</div>
 
-  <span class="card-category">SECURITY TOOL</span>
+        <article class="card">
 
-  <h3>Password Generator</h3>
+          <div class="card-icon">🔐</div>
 
-  <p>
-    Generate secure random passwords with
-    customizable length and character options.
-  </p>
+          <span class="card-category">
+            SECURITY TOOL
+          </span>
 
-  <a href="./experiments/password-generator/"
-     class="card-link">
-    Open Password Generator ↗
-  </a>
-</article>
+          <h3>Password Generator</h3>
 
+          <p>
+            Generate secure random passwords with
+            customizable length and character options.
+          </p>
+
+          <a
+            href="./experiments/password-generator/"
+            class="card-link">
+            Open Password Generator ↗
+          </a>
+
+        </article>
 
 
         <!-- CREATIVE LAB -->
+
         <article class="card">
 
           <div class="card-icon">✨</div>
 
-          <span class="card-category">COMING SOON</span>
+          <span class="card-category">
+            COMING SOON
+          </span>
 
           <h3>Creative Lab</h3>
 
@@ -298,10 +340,13 @@
     </section>
 
 
-    <!-- PROJECTS -->
+    <!-- PROJECTS SECTION -->
+
     <section class="section" id="projects">
 
-      <div class="section-label">03 / MY PROJECTS</div>
+      <div class="section-label">
+        03 / MY PROJECTS
+      </div>
 
       <h2>
         Built with
@@ -314,15 +359,18 @@
       </p>
 
 
-      <!-- COLOR PROJECT -->
+      <!-- PROJECT 1: COLOR GENERATOR -->
+
       <div class="project-card">
 
         <div class="project-visual">
+
           <span>🎨</span>
 
           <div class="project-visual-text">
             COLOR PLAYGROUND
           </div>
+
         </div>
 
         <div class="project-info">
@@ -345,8 +393,9 @@
             <span>JavaScript</span>
           </div>
 
-          <a href="./experiments/color-generator/"
-             class="card-link">
+          <a
+            href="./experiments/color-generator/"
+            class="card-link">
             View Project ↗
           </a>
 
@@ -355,15 +404,18 @@
       </div>
 
 
-      <!-- CALCULATOR PROJECT -->
+      <!-- PROJECT 2: CALCULATOR -->
+
       <div class="project-card">
 
         <div class="project-visual">
+
           <span>🧮</span>
 
           <div class="project-visual-text">
             MINI CALCULATOR
           </div>
+
         </div>
 
         <div class="project-info">
@@ -386,8 +438,9 @@
             <span>JavaScript</span>
           </div>
 
-          <a href="./experiments/calculator/"
-             class="card-link">
+          <a
+            href="./experiments/calculator/"
+            class="card-link">
             View Calculator ↗
           </a>
 
@@ -396,21 +449,71 @@
       </div>
 
 
-      <!-- GITHUB -->
+      <!-- PROJECT 3: PASSWORD GENERATOR -->
+
+      <div class="project-card">
+
+        <div class="project-visual">
+
+          <span>🔐</span>
+
+          <div class="project-visual-text">
+            PASSWORD GENERATOR
+          </div>
+
+        </div>
+
+        <div class="project-info">
+
+          <span class="card-category">
+            SECURITY TOOL
+          </span>
+
+          <h3>Password Generator</h3>
+
+          <p>
+            Generate secure random passwords with
+            customizable length, numbers, symbols
+            and character options.
+          </p>
+
+          <div class="project-tags">
+            <span>HTML</span>
+            <span>CSS</span>
+            <span>JavaScript</span>
+            <span>Web Crypto API</span>
+          </div>
+
+          <a
+            href="./experiments/password-generator/"
+            class="card-link">
+            View Password Generator ↗
+          </a>
+
+        </div>
+
+      </div>
+
+
+      <!-- GITHUB BANNER -->
+
       <div class="github-banner">
 
         <div>
+
           <h3>More projects on GitHub</h3>
 
           <p>
             Follow my journey and explore what I'm building.
           </p>
+
         </div>
 
-        <a href="https://github.com/Ayush-Pandey-codes"
-           target="_blank"
-           rel="noopener noreferrer"
-           class="secondary-button">
+        <a
+          href="https://github.com/Ayush-Pandey-codes"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="secondary-button">
           Visit GitHub ↗
         </a>
 
@@ -419,10 +522,13 @@
     </section>
 
 
-    <!-- CONTACT -->
+    <!-- CONTACT SECTION -->
+
     <section class="section contact" id="contact">
 
-      <div class="section-label">04 / SAY HELLO</div>
+      <div class="section-label">
+        04 / SAY HELLO
+      </div>
 
       <h2>
         Have an idea?
@@ -434,16 +540,18 @@
         new opportunities and collaborations.
       </p>
 
-      <a href="mailto:ayushpandey1d@gmail.com"
-         class="primary-button">
+      <a
+        href="mailto:ayushpandey1d@gmail.com"
+        class="primary-button">
         Send Me an Email ↗
       </a>
 
       <div class="social-links">
 
-        <a href="https://github.com/Ayush-Pandey-codes"
-           target="_blank"
-           rel="noopener noreferrer">
+        <a
+          href="https://github.com/Ayush-Pandey-codes"
+          target="_blank"
+          rel="noopener noreferrer">
           GitHub ↗
         </a>
 
@@ -459,6 +567,7 @@
 
 
   <!-- FOOTER -->
+
   <footer>
 
     <a href="#home" class="logo">
@@ -476,6 +585,8 @@
 
   </footer>
 
+
+  <!-- JAVASCRIPT -->
 
   <script src="./script.js"></script>
 
