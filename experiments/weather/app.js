@@ -1,66 +1,42 @@
 
-// ============================================
-// WEATHER INTELLIGENCE 3.0
-// Weather + Air Quality + Forecasts + 3D Earth
-// Data: Open-Meteo
-// Globe: MapLibre GL
-// ============================================
+"use strict";
 
-const WEATHER_API = "https://api.open-meteo.com/v1/forecast";
-const AIR_API = "https://air-quality-api.open-meteo.com/v1/air-quality";
-const GEO_API = "https://geocoding-api.open-meteo.com/v1/search";
+/* =========================================
+   WEATHER APP
+   Weather data: Open-Meteo
+   Earth globe: MapLibre GL JS
+========================================= */
 
-// Satellite tiles: EOX Sentinel-2 cloudless mosaic (2020).
-
-// App state
-let currentPlace = {
-  name: "Helsinki",
-  country: "Finland",
-  latitude: 60.1699,
-  longitude: 24.9384
+const API = {
+  geocoding: "https://geocoding-api.open-meteo.com/v1/search",
+  forecast: "https://api.open-meteo.com/v1/forecast",
+  airQuality: "https://air-quality-api.open-meteo.com/v1/air-quality"
 };
-
-let weatherData = null;
-let airData = null;
-let useCelsius = true;
-let favorites = loadFavorites();
-
-// Request counters prevent outdated searches or API responses
-// from replacing the newest selected location.
-let dashboardRequestId = 0;
-let citySearchRequestId = 0;
-
-// Globe state
-let earthMap = null;
-let earthMarker = null;
-let earthInitialized = false;
-
-// ============================================
-// ELEMENTS
-// ============================================
 
 const $ = (id) => document.getElementById(id);
 
-const searchForm = $("search-form");
-const cityInput = $("city-input");
-const locationButton = $("location-button");
-const refreshButton = $("refresh-button");
-const unitToggle = $("unit-toggle");
-const favoriteButton = $("favorite-button");
-const statusBox = $("status");
-const dashboard = $("dashboard");
+const state = {
+  city: null,
+  weather: null,
+  air: null,
+  unit: "celsius",
+  favorites: loadFavorites(),
+  map: null,
+  marker: null,
+  mapReady: false
+};
 
-// ============================================
-// WEATHER DESCRIPTIONS
-// ============================================
+/* =========================================
+   WEATHER CODE INFORMATION
+========================================= */
 
 function getWeatherInfo(code, isDay = true) {
-  const conditions = {
+  const weather = {
     0: ["Clear sky", isDay ? "☀️" : "🌙"],
     1: ["Mainly clear", isDay ? "🌤️" : "🌙"],
     2: ["Partly cloudy", "⛅"],
     3: ["Overcast", "☁️"],
-    45: ["Foggy", "🌫️"],
+    45: ["Fog", "🌫️"],
     48: ["Depositing rime fog", "🌫️"],
     51: ["Light drizzle", "🌦️"],
     53: ["Moderate drizzle", "🌦️"],
@@ -73,948 +49,611 @@ function getWeatherInfo(code, isDay = true) {
     66: ["Freezing rain", "🌧️"],
     67: ["Heavy freezing rain", "🌧️"],
     71: ["Slight snowfall", "🌨️"],
-    73: ["Moderate snowfall", "🌨️"],
+    73: ["Moderate snowfall", "❄️"],
     75: ["Heavy snowfall", "❄️"],
-    77: ["Snow grains", "❄️"],
+    77: ["Snow grains", "🌨️"],
     80: ["Rain showers", "🌦️"],
-    81: ["Moderate showers", "🌧️"],
-    82: ["Violent showers", "⛈️"],
+    81: ["Moderate rain showers", "🌧️"],
+    82: ["Violent rain showers", "⛈️"],
     85: ["Snow showers", "🌨️"],
     86: ["Heavy snow showers", "❄️"],
     95: ["Thunderstorm", "⛈️"],
     96: ["Thunderstorm with hail", "⛈️"],
-    99: ["Heavy thunderstorm", "⛈️"]
+    99: ["Severe thunderstorm with hail", "⛈️"]
   };
 
-  return conditions[code] || ["Unknown conditions", "🌡️"];
+  return weather[code] || ["Unknown conditions", "🌡️"];
 }
 
-// ============================================
-// HELPERS
-// ============================================
+function iconData(emoji) {
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+      <text x="50%" y="53%" dominant-baseline="middle"
+        text-anchor="middle" font-size="76">${emoji}</text>
+    </svg>
+  `;
 
-function setStatus(message, isError = false) {
-  if (!statusBox) return;
-
-  statusBox.textContent = message;
-  statusBox.classList.toggle("error", isError);
+  return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
 }
 
-function round(value) {
-  return value == null ? "--" : Math.round(value);
+/* =========================================
+   DATE AND NUMBER HELPERS
+========================================= */
+
+function formatDate(dateString, options = {}) {
+  if (!dateString) return "--";
+
+  const date = new Date(dateString + "T12:00:00");
+
+  return date.toLocaleDateString(undefined, {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    ...options
+  });
+}
+
+function formatTime(dateString) {
+  if (!dateString) return "--";
+
+  const date = new Date(dateString);
+
+  return date.toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+}
+
+function number(value, digits = 0) {
+  if (value === null || value === undefined || !Number.isFinite(Number(value))) {
+    return "--";
+  }
+
+  return Number(value).toFixed(digits);
 }
 
 function temperature(value) {
-  if (value == null) return "--°";
+  if (value === null || value === undefined) return "--";
 
-  const converted = useCelsius
-    ? value
-    : (value * 9 / 5) + 32;
+  if (state.unit === "fahrenheit") {
+    return `${Math.round((value * 9) / 5 + 32)}°`;
+  }
 
-  return `${Math.round(converted)}°`;
+  return `${Math.round(value)}°`;
 }
 
-function windDirection(degrees) {
-  if (degrees == null) return "--";
+function windSpeed(value) {
+  if (value === null || value === undefined) return "--";
 
-  const directions = [
-    "N", "NE", "E", "SE",
-    "S", "SW", "W", "NW"
-  ];
+  if (state.unit === "fahrenheit") {
+    return `${number(value * 0.621371)} mph`;
+  }
 
-  return directions[Math.round(degrees / 45) % 8];
+  return `${number(value)} km/h`;
 }
 
-function formatTime(time) {
-  if (!time) return "--:--";
-  return time.slice(11, 16);
+function setStatus(message, type = "") {
+  const element = $("status");
+  if (!element) return;
+
+  element.textContent = message;
+  element.className = "status";
+
+  if (type) element.classList.add(type);
 }
 
-function formatDay(date, index) {
-  if (index === 0) return "Today";
-  if (index === 1) return "Tomorrow";
+/* =========================================
+   FETCH HELPERS
+========================================= */
 
-  return new Date(`${date}T12:00:00`).toLocaleDateString(
-    undefined,
-    { weekday: "short" }
-  );
+async function fetchJSON(url) {
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    throw new Error(`Request failed (${response.status})`);
+  }
+
+  return response.json();
 }
 
-function getClosestIndex(times, targetTime) {
-  if (!times || !times.length) return 0;
+/* =========================================
+   CITY SEARCH
+========================================= */
 
-  const target = new Date(targetTime).getTime();
+async function searchCity(query) {
+  const url = new URL(API.geocoding);
 
-  let closest = 0;
-  let smallestDifference = Infinity;
-
-  times.forEach((time, index) => {
-    const difference = Math.abs(
-      new Date(time).getTime() - target
-    );
-
-    if (difference < smallestDifference) {
-      smallestDifference = difference;
-      closest = index;
-    }
+  url.search = new URLSearchParams({
+    name: query,
+    count: "1",
+    language: "en",
+    format: "json"
   });
 
-  return closest;
+  const data = await fetchJSON(url);
+
+  if (!data.results || data.results.length === 0) {
+    throw new Error("City not found. Try another city name.");
+  }
+
+  return data.results[0];
 }
 
-function getAQIInfo(aqi) {
-  if (aqi == null) {
-    return {
-      label: "Unavailable",
-      advice: "Air quality information is not available right now.",
-      color: "#9299b7"
-    };
+async function loadCity(query) {
+  if (!query || !query.trim()) {
+    setStatus("Please enter a city name.", "error");
+    return;
   }
 
-  if (aqi <= 50) {
-    return {
-      label: "Good",
-      advice: "Air quality is considered satisfactory. Enjoy your usual outdoor activities.",
-      color: "#69dba5"
-    };
-  }
+  setStatus("Searching for your city...");
 
-  if (aqi <= 100) {
-    return {
-      label: "Moderate",
-      advice: "Air quality is acceptable. Unusually sensitive people may wish to take care.",
-      color: "#e4cf70"
-    };
-  }
+  try {
+    const city = await searchCity(query.trim());
 
-  if (aqi <= 150) {
-    return {
-      label: "Unhealthy for sensitive groups",
-      advice: "Sensitive individuals may want to reduce prolonged or intense outdoor activity.",
-      color: "#edaa65"
-    };
+    await loadWeather(city);
+  } catch (error) {
+    console.error(error);
+    setStatus(error.message || "Could not find that city.", "error");
   }
-
-  if (aqi <= 200) {
-    return {
-      label: "Unhealthy",
-      advice: "Consider reducing prolonged outdoor activity, especially if you are sensitive to pollution.",
-      color: "#ed827e"
-    };
-  }
-
-  if (aqi <= 300) {
-    return {
-      label: "Very unhealthy",
-      advice: "Avoid prolonged outdoor exertion. Consider spending more time indoors.",
-      color: "#b994ec"
-    };
-  }
-
-  return {
-    label: "Hazardous",
-    advice: "Avoid outdoor exertion and follow local public-health guidance.",
-    color: "#d879b7"
-  };
 }
 
-// ============================================
-// FETCH WEATHER DATA
-// ============================================
+/* =========================================
+   WEATHER DATA
+========================================= */
 
-async function fetchWeather(place = currentPlace) {
-  const { latitude, longitude } = place;
+async function loadWeather(city) {
+  setStatus(`Loading weather for ${city.name}...`);
 
   const params = new URLSearchParams({
-    latitude,
-    longitude,
+    latitude: city.latitude,
+    longitude: city.longitude,
     timezone: "auto",
     forecast_days: "7",
-
-    current: [
-      "temperature_2m",
-      "relative_humidity_2m",
-      "apparent_temperature",
-      "precipitation",
-      "weather_code",
-      "wind_speed_10m",
-      "wind_direction_10m",
-      "is_day"
-    ].join(","),
-
     hourly: [
       "temperature_2m",
+      "relative_humidity_2m",
       "precipitation_probability",
       "weather_code",
-      "uv_index"
+      "wind_speed_10m",
+      "is_day"
     ].join(","),
-
     daily: [
       "weather_code",
       "temperature_2m_max",
       "temperature_2m_min",
       "sunrise",
       "sunset",
-      "uv_index_max"
+      "uv_index_max",
+      "precipitation_probability_max"
+    ].join(","),
+    current: [
+      "temperature_2m",
+      "relative_humidity_2m",
+      "apparent_temperature",
+      "is_day",
+      "precipitation",
+      "weather_code",
+      "wind_speed_10m",
+      "wind_direction_10m"
     ].join(",")
   });
 
-  const response = await fetch(`${WEATHER_API}?${params}`);
+  try {
+    const weather = await fetchJSON(`${API.forecast}?${params}`);
 
-  if (!response.ok) {
-    throw new Error("Could not retrieve weather data.");
+    state.city = city;
+    state.weather = weather;
+
+    renderDashboard();
+    updateEarthLocation(city);
+
+    loadAirQuality(city).catch((error) => {
+      console.warn("Air quality could not be loaded:", error);
+      renderAirQuality(null);
+    });
+
+    setStatus(`Weather updated for ${city.name}.`, "success");
+  } catch (error) {
+    console.error(error);
+    setStatus("Unable to load weather data. Please try again.", "error");
+    throw error;
   }
-
-  return response.json();
 }
 
-// ============================================
-// FETCH AIR QUALITY DATA
-// ============================================
+/* =========================================
+   DASHBOARD RENDERING
+========================================= */
 
-async function fetchAirQuality(place = currentPlace) {
-  const { latitude, longitude } = place;
+function renderDashboard() {
+  if (!state.city || !state.weather) return;
 
-  const params = new URLSearchParams({
-    latitude,
-    longitude,
-    timezone: "auto",
-    forecast_days: "5",
+  const city = state.city;
+  const weather = state.weather;
+  const current = weather.current;
+  const daily = weather.daily;
 
-    hourly: [
-      "us_aqi",
-      "pm2_5",
-      "pm10",
-      "nitrogen_dioxide",
-      "ozone"
-    ].join(",")
-  });
+  $("dashboard")?.removeAttribute("hidden");
 
-  const response = await fetch(`${AIR_API}?${params}`);
-
-  if (!response.ok) {
-    throw new Error("Air quality service is temporarily unavailable.");
+  if ($("city-name")) {
+    $("city-name").textContent = city.name;
   }
 
-  return response.json();
-}
-
-// ============================================
-// LOAD DASHBOARD
-// ============================================
-
-async function loadDashboard() {
-  citySearchRequestId++;
-
-  const requestId = ++dashboardRequestId;
-  const place = { ...currentPlace };
-
-  setStatus("Updating weather intelligence...");
-  dashboard.classList.add("hidden");
-
-  weatherData = null;
-  airData = null;
-
-  const results = await Promise.allSettled([
-    fetchWeather(place),
-    fetchAirQuality(place)
-  ]);
-
-  if (requestId !== dashboardRequestId) return;
-
-  if (results[0].status === "rejected") {
-    console.error(results[0].reason);
-
-    setStatus(
-      "Weather could not be loaded. Please try another city or refresh.",
-      true
+  if ($("current-date")) {
+    $("current-date").textContent = formatDate(
+      current.time?.slice(0, 10) || new Date().toISOString().slice(0, 10)
     );
+  }
 
+  const info = getWeatherInfo(current.weather_code, current.is_day === 1);
+
+  if ($("temperature")) {
+    $("temperature").textContent = temperature(current.temperature_2m);
+  }
+
+  if ($("condition")) {
+    $("condition").textContent = info[0];
+  }
+
+  if ($("feels-like")) {
+    $("feels-like").textContent =
+      `Feels like ${temperature(current.apparent_temperature)}`;
+  }
+
+  if ($("weather-icon")) {
+    $("weather-icon").src = iconData(info[1]);
+    $("weather-icon").alt = info[0];
+  }
+
+  setText("humidity", `${number(current.relative_humidity_2m)}%`);
+  setText("wind", windSpeed(current.wind_speed_10m));
+  setText("precipitation", `${number(current.precipitation, 1)} mm`);
+
+  setText("sunrise", formatTime(daily.sunrise?.[0]));
+  setText("sunset", formatTime(daily.sunset?.[0]));
+
+  renderUV(daily.uv_index_max?.[0]);
+  renderHourly();
+  renderDaily();
+  renderDetails();
+  renderChart();
+  renderFavorites();
+  updateFavoriteButton();
+}
+
+function setText(id, value) {
+  const element = $(id);
+  if (element) element.textContent = value;
+}
+
+/* =========================================
+   UV INDEX
+========================================= */
+
+function renderUV(value) {
+  const uv = Number(value);
+
+  if (!Number.isFinite(uv)) {
+    setText("uv-value", "--");
+    setText("uv-label", "Unavailable");
+    setText("uv-advice", "UV information is currently unavailable.");
+
+    if ($("uv-meter")) $("uv-meter").style.width = "0%";
     return;
   }
 
-  weatherData = results[0].value;
-
-  if (results[1].status === "fulfilled") {
-    airData = results[1].value;
-  } else {
-    airData = null;
-    console.error(results[1].reason);
-  }
-
-  renderDashboard();
-  dashboard.classList.remove("hidden");
-
-  if (airData) {
-    setStatus("Weather and air quality updated.");
-  } else {
-    setStatus("Weather updated. Air quality is temporarily unavailable.");
-  }
-}
-
-// ============================================
-// RENDER EVERYTHING
-// ============================================
-
-function renderDashboard() {
-  if (!weatherData) return;
-
-  renderCurrentWeather();
-  renderSunAndUV();
-  renderAirQuality();
-  renderHourly();
-  renderTemperatureChart();
-  renderDaily();
-  renderDetails();
-  renderFavorites();
-  updateFavoriteButton();
-  updateWeatherEffects();
-
-  // Update the Earth whenever the selected city changes.
-  updateEarthLocation();
-}
-
-// ============================================
-// CURRENT WEATHER
-// ============================================
-
-function renderCurrentWeather() {
-  const current = weatherData.current;
-
-  const [description, icon] = getWeatherInfo(
-    current.weather_code,
-    current.is_day === 1
-  );
-
-  $("city-name").textContent =
-    `${currentPlace.name}, ${currentPlace.country}`;
-
-  $("current-date").textContent = new Date(
-    current.time
-  ).toLocaleDateString(undefined, {
-    weekday: "long",
-    day: "numeric",
-    month: "long"
-  });
-
-  $("temperature").textContent =
-    temperature(current.temperature_2m);
-
-  $("condition").textContent = description;
-  $("weather-icon").textContent = icon;
-
-  $("feels-like").textContent =
-    `Feels like ${temperature(current.apparent_temperature)}`;
-
-  $("humidity").textContent =
-    `${round(current.relative_humidity_2m)}%`;
-
-  $("wind").textContent =
-    `${round(current.wind_speed_10m)} km/h`;
-
-  $("precipitation").textContent =
-    `${round(current.precipitation)} mm`;
-}
-
-// ============================================
-// SUNRISE / SUNSET / UV
-// ============================================
-
-function renderSunAndUV() {
-  const daily = weatherData.daily;
-
-  $("sunrise").textContent = formatTime(daily.sunrise[0]);
-  $("sunset").textContent = formatTime(daily.sunset[0]);
-
-  const uv = daily.uv_index_max[0] ?? 0;
-
   let label = "Low";
-  let advice = "Low UV exposure. Normal outdoor activity is fine.";
+  let advice = "Enjoy being outdoors. Normal sun protection is recommended.";
 
   if (uv >= 3 && uv < 6) {
     label = "Moderate";
-    advice = "Consider sun protection during extended outdoor activity.";
+    advice = "Consider sunscreen, sunglasses, and shade during midday.";
   } else if (uv >= 6 && uv < 8) {
     label = "High";
-    advice = "Use sunscreen, sunglasses and protective clothing.";
+    advice = "Use sunscreen, protective clothing, and seek shade.";
   } else if (uv >= 8 && uv < 11) {
     label = "Very high";
-    advice = "Minimise midday sun exposure and use strong sun protection.";
+    advice = "Reduce time in the sun and use strong sun protection.";
   } else if (uv >= 11) {
     label = "Extreme";
-    advice = "Avoid direct midday sun where possible and use full sun protection.";
+    advice = "Avoid direct sunlight during peak UV hours.";
   }
 
-  $("uv-value").textContent = round(uv);
-  $("uv-label").textContent = label;
-  $("uv-advice").textContent = advice;
+  setText("uv-value", number(uv, 1));
+  setText("uv-label", label);
+  setText("uv-advice", advice);
 
-  $("uv-meter").style.width =
-    `${Math.min(uv / 11 * 100, 100)}%`;
-}
-
-// ============================================
-// AIR QUALITY
-// ============================================
-
-function renderAirQuality() {
-  const container = $("air-content");
-
-  if (!airData || !airData.hourly) {
-    container.innerHTML = `
-      <p class="muted">
-        Air quality data is temporarily unavailable.
-        Please try refreshing the dashboard.
-      </p>
-    `;
-    return;
+  const meter = $("uv-meter");
+  if (meter) {
+    meter.style.width = `${Math.min(100, (uv / 11) * 100)}%`;
   }
-
-  const hourly = airData.hourly;
-
-  const index = getClosestIndex(
-    hourly.time,
-    weatherData.current.time
-  );
-
-  const aqi = hourly.us_aqi?.[index];
-  const pm25 = hourly.pm2_5?.[index];
-  const pm10 = hourly.pm10?.[index];
-  const no2 = hourly.nitrogen_dioxide?.[index];
-  const ozone = hourly.ozone?.[index];
-
-  const info = getAQIInfo(aqi);
-
-  const displayValue = (value) =>
-    value == null ? "--" : Number(value).toFixed(1);
-
-  const aqiValue = aqi == null ? "--" : Math.round(aqi);
-
-  container.innerHTML = `
-    <div class="aqi-summary">
-      <div class="aqi-number" style="border-color:${info.color};background:${info.color}18">
-        <strong style="color:${info.color}">${aqiValue}</strong>
-        <span>US AQI</span>
-      </div>
-
-      <div class="aqi-description">
-        <strong style="color:${info.color}">${info.label}</strong>
-        <p>${info.advice}</p>
-      </div>
-    </div>
-
-    <div class="pollutants">
-      <div class="pollutant">
-        <span>PM2.5</span>
-        <strong>${displayValue(pm25)}</strong>
-        <small>µg/m³</small>
-      </div>
-
-      <div class="pollutant">
-        <span>PM10</span>
-        <strong>${displayValue(pm10)}</strong>
-        <small>µg/m³</small>
-      </div>
-
-      <div class="pollutant">
-        <span>NO₂</span>
-        <strong>${displayValue(no2)}</strong>
-        <small>µg/m³</small>
-      </div>
-
-      <div class="pollutant">
-        <span>O₃</span>
-        <strong>${displayValue(ozone)}</strong>
-        <small>µg/m³</small>
-      </div>
-    </div>
-  `;
 }
 
-// ============================================
-// HOURLY FORECAST
-// ============================================
+/* =========================================
+   HOURLY FORECAST
+========================================= */
 
 function renderHourly() {
-  const hourly = weatherData.hourly;
-  const currentTime = weatherData.current.time;
-
-  const start = getClosestIndex(hourly.time, currentTime);
   const container = $("hourly-forecast");
+  if (!container || !state.weather) return;
 
-  container.innerHTML = "";
+  const hourly = state.weather.hourly;
+  const now = new Date(state.weather.current.time).getTime();
 
-  for (
-    let i = start;
-    i < Math.min(start + 12, hourly.time.length);
-    i++
-  ) {
-    const [description, icon] = getWeatherInfo(
+  let startIndex = hourly.time.findIndex(
+    (time) => new Date(time).getTime() >= now
+  );
+
+  if (startIndex < 0) startIndex = 0;
+
+  const items = hourly.time.slice(startIndex, startIndex + 8);
+
+  container.innerHTML = items.map((time, index) => {
+    const i = startIndex + index;
+    const info = getWeatherInfo(
       hourly.weather_code[i],
-      true
+      hourly.is_day?.[i] === 1
     );
 
-    const time = i === start
-      ? "Now"
-      : formatTime(hourly.time[i]);
+    const label = index === 0 ? "Now" : formatTime(time);
 
-    const rain = hourly.precipitation_probability[i];
-
-    const item = document.createElement("div");
-    item.className = "hour-item";
-
-    item.innerHTML = `
-      <div class="time">${time}</div>
-      <div class="icon" title="${description}">${icon}</div>
-      <strong>${temperature(hourly.temperature_2m[i])}</strong>
-      <span class="rain">${rain ?? 0}% rain</span>
+    return `
+      <div class="hour-card">
+        <span class="hour-time">${label}</span>
+        <img class="hour-icon" src="${iconData(info[1])}" alt="${info[0]}">
+        <strong class="hour-temp">${temperature(hourly.temperature_2m[i])}</strong>
+        <span class="hour-time">${number(hourly.precipitation_probability[i])}% rain</span>
+      </div>
     `;
-
-    container.appendChild(item);
-  }
+  }).join("");
 }
 
-// ============================================
-// TEMPERATURE GRAPH
-// ============================================
+/* =========================================
+   DAILY FORECAST
+========================================= */
 
-function renderTemperatureChart() {
-  const hourly = weatherData.hourly;
-  const currentTime = weatherData.current.time;
+function renderDaily() {
+  const container = $("daily-forecast");
+  if (!container || !state.weather) return;
 
-  const start = getClosestIndex(hourly.time, currentTime);
-  const values = hourly.temperature_2m.slice(start, start + 24);
+  const daily = state.weather.daily;
+
+  container.innerHTML = daily.time.map((date, index) => {
+    const info = getWeatherInfo(daily.weather_code[index]);
+
+    const dayName = index === 0
+      ? "Today"
+      : new Date(date + "T12:00:00").toLocaleDateString(undefined, {
+          weekday: "short"
+        });
+
+    return `
+      <div class="day-row">
+        <span class="day-name">${dayName}</span>
+        <img class="day-icon" src="${iconData(info[1])}" alt="${info[0]}">
+        <div class="day-temperatures">
+          <span class="day-high">${temperature(daily.temperature_2m_max[index])}</span>
+          <span class="day-low">${temperature(daily.temperature_2m_min[index])}</span>
+        </div>
+        <span class="day-rain">${number(daily.precipitation_probability_max[index])}% rain</span>
+      </div>
+    `;
+  }).join("");
+}
+
+/* =========================================
+   WEATHER DETAILS
+========================================= */
+
+function renderDetails() {
+  const current = state.weather.current;
+
+  setText("detail-feels", temperature(current.apparent_temperature));
+  setText("detail-humidity", `${number(current.relative_humidity_2m)}%`);
+  setText("detail-direction", `${number(current.wind_direction_10m)}°`);
+  setText("detail-rain", `${number(current.precipitation, 1)} mm`);
+}
+
+/* =========================================
+   TEMPERATURE CHART
+========================================= */
+
+function renderChart() {
+  const svg = $("temperature-chart");
+  const labels = $("chart-labels");
+
+  if (!svg || !state.weather) return;
+
+  const hourly = state.weather.hourly;
+  const now = new Date(state.weather.current.time).getTime();
+
+  let start = hourly.time.findIndex(
+    (time) => new Date(time).getTime() >= now
+  );
+
+  if (start < 0) start = 0;
+
+  const values = hourly.temperature_2m.slice(start, start + 12);
 
   if (values.length < 2) return;
 
-  const width = 700;
-  const height = 190;
-  const padding = 22;
-
   const min = Math.min(...values) - 2;
   const max = Math.max(...values) + 2;
-  const range = Math.max(max - min, 1);
+  const range = max - min || 1;
+
+  const width = 700;
+  const height = 170;
+  const paddingX = 20;
+  const paddingY = 25;
 
   const points = values.map((value, index) => {
-    const x = padding +
-      (index / (values.length - 1)) * (width - padding * 2);
+    const x = paddingX +
+      (index / (values.length - 1)) * (width - paddingX * 2);
 
-    const y = height - padding -
-      ((value - min) / range) * (height - padding * 2);
+    const y = height - paddingY -
+      ((value - min) / range) * (height - paddingY * 2);
 
     return { x, y, value };
   });
 
-  const line = points.map((point, index) =>
-    `${index === 0 ? "M" : "L"} ${point.x} ${point.y}`
-  ).join(" ");
+  const line = points
+    .map((point, index) => `${index === 0 ? "M" : "L"} ${point.x} ${point.y}`)
+    .join(" ");
 
-  const area = `${line} L ${points[points.length - 1].x} ${height - padding} L ${points[0].x} ${height - padding} Z`;
+  const area = `${line} L ${points[points.length - 1].x} ${height} L ${points[0].x} ${height} Z`;
 
-  $("temperature-chart").innerHTML = `
+  svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+
+  svg.innerHTML = `
     <defs>
-      <linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stop-color="#a99aff" stop-opacity=".34"/>
-        <stop offset="100%" stop-color="#a99aff" stop-opacity="0"/>
+      <linearGradient id="chart-fill" x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0%" stop-color="#54c8ff" stop-opacity=".30"/>
+        <stop offset="100%" stop-color="#54c8ff" stop-opacity="0"/>
       </linearGradient>
     </defs>
 
-    <path class="chart-area" d="${area}"></path>
-    <path class="chart-line" d="${line}"></path>
+    <path d="${area}" fill="url(#chart-fill)"></path>
 
-    ${points.filter((_, i) => i % 3 === 0 || i === points.length - 1).map(point =>
-      `<circle class="chart-point" cx="${point.x}" cy="${point.y}" r="4">
-        <title>${temperature(point.value)}</title>
-      </circle>`
-    ).join("")}
+    <path d="${line}"
+      fill="none"
+      stroke="#54c8ff"
+      stroke-width="3"
+      stroke-linecap="round"
+      stroke-linejoin="round"></path>
+
+    ${points.map((point) => `
+      <circle cx="${point.x}" cy="${point.y}" r="4"
+        fill="#54c8ff" stroke="#101a2b" stroke-width="2"></circle>
+    `).join("")}
   `;
 
-  const labels = [0, 6, 12, 18, 23];
+  if (labels) {
+    labels.innerHTML = points.map((point, index) => {
+      const time = hourly.time[start + index];
 
-  $("chart-labels").innerHTML = labels.map(index => {
-    if (!hourly.time[start + index]) return "";
-
-    return `<span>${formatTime(hourly.time[start + index])}</span>`;
-  }).join("");
+      return `<span>${formatTime(time)}</span>`;
+    }).join("");
+  }
 }
 
-// ============================================
-// 7-DAY FORECAST
-// ============================================
+/* =========================================
+   AIR QUALITY
+========================================= */
 
-function renderDaily() {
-  const daily = weatherData.daily;
-  const container = $("daily-forecast");
-
-  container.innerHTML = "";
-
-  daily.time.forEach((date, index) => {
-    const [description, icon] = getWeatherInfo(
-      daily.weather_code[index],
-      true
-    );
-
-    const row = document.createElement("div");
-    row.className = "day-row";
-
-    row.innerHTML = `
-      <span class="day-name">${formatDay(date, index)}</span>
-      <span class="day-icon" title="${description}">${icon}</span>
-      <span class="day-condition">${description}</span>
-      <span class="day-temps">
-        ${temperature(daily.temperature_2m_max[index])}
-        <span>${temperature(daily.temperature_2m_min[index])}</span>
-      </span>
-    `;
-
-    container.appendChild(row);
+async function loadAirQuality(city) {
+  const params = new URLSearchParams({
+    latitude: city.latitude,
+    longitude: city.longitude,
+    timezone: "auto",
+    current: [
+      "european_aqi",
+      "us_aqi",
+      "pm10",
+      "pm2_5"
+    ].join(",")
   });
+
+  const data = await fetchJSON(`${API.airQuality}?${params}`);
+
+  state.air = data;
+  renderAirQuality(data);
 }
 
-// ============================================
-// EXTRA WEATHER DETAILS
-// ============================================
-
-function renderDetails() {
-  const current = weatherData.current;
-  const hourly = weatherData.hourly;
-
-  const index = getClosestIndex(
-    hourly.time,
-    current.time
-  );
-
-  $("detail-feels").textContent =
-    temperature(current.apparent_temperature);
-
-  $("detail-humidity").textContent =
-    `${round(current.relative_humidity_2m)}%`;
-
-  $("detail-direction").textContent =
-    windDirection(current.wind_direction_10m);
-
-  $("detail-rain").textContent =
-    `${round(hourly.precipitation_probability[index])}%`;
-}
-
-// ============================================
-// WEATHER ANIMATIONS
-// ============================================
-
-function updateWeatherEffects() {
-  const effects = $("weather-effects");
-  effects.innerHTML = "";
-
-  if (!weatherData) return;
-
-  const code = weatherData.current.weather_code;
-
-  // Rain effects
-  if ([51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82, 95, 96, 99].includes(code)) {
-    for (let i = 0; i < 45; i++) {
-      const drop = document.createElement("span");
-      drop.className = "raindrop";
-      drop.style.left = `${Math.random() * 100}%`;
-      drop.style.animationDuration = `${0.6 + Math.random() * 0.8}s`;
-      drop.style.animationDelay = `${Math.random() * 2}s`;
-      effects.appendChild(drop);
-    }
-  }
-
-  // Snow effects
-  if ([71, 73, 75, 77, 85, 86].includes(code)) {
-    for (let i = 0; i < 35; i++) {
-      const snow = document.createElement("span");
-      snow.className = "snowflake";
-      snow.textContent = "❄";
-      snow.style.left = `${Math.random() * 100}%`;
-      snow.style.animationDuration = `${5 + Math.random() * 8}s`;
-      snow.style.animationDelay = `${Math.random() * 5}s`;
-      snow.style.fontSize = `${8 + Math.random() * 10}px`;
-      effects.appendChild(snow);
-    }
-  }
-}
-
-// ============================================
-// 3D EARTH EXPLORER
-// ============================================
-
-function initEarth() {
-  const container = $("earth-globe");
-  const mode = $("earth-mode");
+function renderAirQuality(data) {
+  const container = $("air-content");
   if (!container) return;
-  if (earthInitialized && earthMap) {
-    updateEarthLocation();
-    return;
-  }
-  if (typeof maplibregl === "undefined") {
-    if (mode) mode.textContent = "Satellite globe unavailable";
-    container.innerHTML = '<p class="earth-loading">Could not load the map library. Check your internet connection.</p>';
-    return;
-  }
 
-  try {
-    earthMap = new maplibregl.Map({
-      container,
-      projection: { type: "globe" },
-      style: {
-        version: 8,
-        sources: {
-          satellite: {
-            type: "raster",
-            tiles: [
-              "https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2020_3857/default/g/{z}/{y}/{x}.jpg"
-            ],
-            tileSize: 256,
-            maxzoom: 14,
-            attribution: 'Satellite imagery: <a href="https://s2maps.eu" target="_blank" rel="noreferrer">Sentinel-2 cloudless / EOX</a> (2020)'
-          }
-        },
-        layers: [
-          { id: "satellite-imagery", type: "raster", source: "satellite",
-            paint: { "raster-fade-duration": 250, "raster-saturation": 0.12 } }
-        ],
-        light: {
-          anchor: "map",
-          color: "#ffffff",
-          intensity: 0.42,
-          position: [1.5, 210, 35]
-        }
-      },
-      center: [currentPlace.longitude, currentPlace.latitude],
-      zoom: 1.25,
-      minZoom: 0.8,
-      maxZoom: 14,
-      dragRotate: true,
-      touchPitch: true,
-      attributionControl: true
-    });
-
-    earthMap.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), "top-right");
-    earthMap.addControl(new maplibregl.ScaleControl({ maxWidth: 100, unit: "metric" }), "bottom-left");
-
-    earthMap.on("load", () => {
-      const markerElement = document.createElement("div");
-      markerElement.className = "earth-marker";
-      markerElement.setAttribute("aria-label", "Selected weather location");
-      earthMarker = new maplibregl.Marker({ element: markerElement, anchor: "center" })
-        .setLngLat([currentPlace.longitude, currentPlace.latitude])
-        .addTo(earthMap);
-      updateEarthLocation();
-      if (mode) mode.textContent = "🌍 SATELLITE GLOBE READY";
-    });
-
-    earthMap.on("error", (event) => {
-      console.warn("Earth map tile or style error:", event.error || event);
-      if (mode && !earthMap.loaded()) mode.textContent = "Loading satellite imagery…";
-    });
-
-    earthInitialized = true;
-  } catch (error) {
-    console.error("Could not initialize satellite globe:", error);
-    if (mode) mode.textContent = "Globe initialization failed";
-  }
-}
-
-function updateEarthLocation() {
-  const cityElement = $("earth-city");
-  const countryElement = $("earth-country");
-  const latitudeElement = $("earth-lat");
-  const longitudeElement = $("earth-lon");
-  const modeElement = $("earth-mode");
-
-  if (cityElement) cityElement.textContent = currentPlace.name;
-  if (countryElement) countryElement.textContent = currentPlace.country || "Selected location";
-  if (latitudeElement) latitudeElement.textContent = `${Number(currentPlace.latitude).toFixed(4)}°`;
-  if (longitudeElement) longitudeElement.textContent = `${Number(currentPlace.longitude).toFixed(4)}°`;
-
-  if (!earthInitialized || !earthMap) {
-    initEarth();
+  if (!data?.current) {
+    container.innerHTML = `
+      <div class="air-score">--</div>
+      <div>
+        <p class="air-description">Air quality unavailable</p>
+        <p class="air-note">Air quality data could not be retrieved right now.</p>
+      </div>
+    `;
     return;
   }
 
-  if (earthMarker) {
-    earthMarker.setLngLat([currentPlace.longitude, currentPlace.latitude]);
+  const current = data.current;
+  const aqi = current.european_aqi ?? current.us_aqi;
+
+  let quality = "Good";
+  let note = "Air quality is satisfactory.";
+
+  if (aqi > 20 && aqi <= 40) {
+    quality = "Fair";
+    note = "Air quality is acceptable for most people.";
+  } else if (aqi > 40 && aqi <= 60) {
+    quality = "Moderate";
+    note = "Sensitive people may experience some effects.";
+  } else if (aqi > 60 && aqi <= 80) {
+    quality = "Poor";
+    note = "Consider reducing prolonged outdoor activity.";
+  } else if (aqi > 80 && aqi <= 100) {
+    quality = "Very poor";
+    note = "Limit outdoor activity if you are sensitive.";
+  } else if (aqi > 100) {
+    quality = "Extremely poor";
+    note = "Avoid prolonged outdoor activity.";
   }
 
-  // Move the globe's directional light to the Sun's approximate subsolar point.
-  // MapLibre shades the globe according to this light direction, creating a real
-  // moving day/night terminator rather than merely changing the atmosphere color.
-  const now = new Date();
-  const dayOfYear = Math.floor((Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()) -
-    Date.UTC(now.getUTCFullYear(), 0, 0)) / 86400000);
-  const fractionalHour = now.getUTCHours() + now.getUTCMinutes() / 60 + now.getUTCSeconds() / 3600;
-  const declination = 23.44 * Math.sin((2 * Math.PI / 365) * (dayOfYear - 81));
-  const solarLongitude = ((180 - fractionalHour * 15 + 540) % 360) - 180;
-  if (typeof earthMap.setLight === "function") {
-    earthMap.setLight({
-      anchor: "map",
-      color: "#ffffff",
-      intensity: 0.62,
-      position: [1.5, solarLongitude, 90 - declination]
-    });
-  }
-
-  // Fly to the chosen city while retaining a useful regional zoom level.
-  earthMap.flyTo({
-    center: [currentPlace.longitude, currentPlace.latitude],
-    zoom: 4.2,
-    pitch: 18,
-    bearing: 0,
-    duration: 1800,
-    essential: true
-  });
-
-  const isDay = weatherData?.current?.is_day === 1;
-  if (modeElement) {
-    modeElement.textContent = isDay
-      ? "☀ SELECTED LOCATION · DAYTIME"
-      : "🌙 SELECTED LOCATION · NIGHTTIME";
-  }
+  container.innerHTML = `
+    <div class="air-score">${number(aqi)}</div>
+    <div>
+      <p class="air-description">${quality}</p>
+      <p class="air-note">${note}</p>
+      <p class="air-note">
+        PM2.5: ${number(current.pm2_5, 1)} μg/m³ ·
+        PM10: ${number(current.pm10, 1)} μg/m³
+      </p>
+    </div>
+  `;
 }
 
-// ============================================
-// CITY SEARCH
-// ============================================
-
-async function searchCity(city) {
-  const query = city.trim();
-  if (!query) return;
-
-  const searchRequestId = ++citySearchRequestId;
-  setStatus(`Searching for ${query}...`);
-
-  try {
-    const params = new URLSearchParams({
-      name: query,
-      count: "1",
-      language: "en",
-      format: "json"
-    });
-
-    const response = await fetch(`${GEO_API}?${params}`);
-
-    if (!response.ok) {
-      throw new Error("City search failed.");
-    }
-
-    const data = await response.json();
-
-    if (searchRequestId !== citySearchRequestId) return;
-
-    if (!data.results || data.results.length === 0) {
-      throw new Error("City not found. Try another city name.");
-    }
-
-    const place = data.results[0];
-
-    currentPlace = {
-      name: place.name,
-      country: place.country || "",
-      latitude: place.latitude,
-      longitude: place.longitude
-    };
-
-    await loadDashboard();
-
-  } catch (error) {
-    if (searchRequestId !== citySearchRequestId) return;
-
-    console.error(error);
-    setStatus(error.message || "Could not search for that city.", true);
-  }
-}
-
-// ============================================
-// MY LOCATION
-// ============================================
-
-function useMyLocation() {
-  if (!navigator.geolocation) {
-    setStatus("Location services are not supported by this browser.", true);
-    return;
-  }
-
-  setStatus("Finding your location...");
-
-  navigator.geolocation.getCurrentPosition(
-    async (position) => {
-      currentPlace = {
-        name: "My location",
-        country: "",
-        latitude: position.coords.latitude,
-        longitude: position.coords.longitude
-      };
-
-      await loadDashboard();
-    },
-
-    (error) => {
-      let message = "Unable to access your location.";
-
-      if (error.code === error.PERMISSION_DENIED) {
-        message = "Location permission was denied. You can search for a city instead.";
-      }
-
-      setStatus(message, true);
-    },
-
-    {
-      enableHighAccuracy: false,
-      timeout: 10000
-    }
-  );
-}
-
-// ============================================
-// FAVOURITE CITIES
-// ============================================
+/* =========================================
+   FAVORITES
+========================================= */
 
 function loadFavorites() {
   try {
-    return JSON.parse(
-      localStorage.getItem("weather-favorites") || "[]"
-    );
+    return JSON.parse(localStorage.getItem("weatherFavorites") || "[]");
   } catch {
     return [];
   }
 }
 
 function saveFavorites() {
-  try {
-    localStorage.setItem(
-      "weather-favorites",
-      JSON.stringify(favorites)
-    );
-  } catch (error) {
-    console.warn("Could not save favourites.", error);
-  }
+  localStorage.setItem("weatherFavorites", JSON.stringify(state.favorites));
 }
 
-function isFavorite() {
-  return favorites.some(place =>
-    place.name === currentPlace.name &&
-    place.country === currentPlace.country
+function isFavorite(city) {
+  if (!city) return false;
+
+  return state.favorites.some(
+    (item) =>
+      item.name.toLowerCase() === city.name.toLowerCase() &&
+      Math.abs(item.latitude - city.latitude) < 0.01 &&
+      Math.abs(item.longitude - city.longitude) < 0.01
   );
 }
 
-function updateFavoriteButton() {
-  const saved = isFavorite();
-
-  favoriteButton.innerHTML = saved
-    ? "★ <span>Saved</span>"
-    : "☆ <span>Save city</span>";
-}
-
 function toggleFavorite() {
-  if (isFavorite()) {
-    favorites = favorites.filter(place =>
-      !(place.name === currentPlace.name &&
-        place.country === currentPlace.country)
+  if (!state.city) return;
+
+  if (isFavorite(state.city)) {
+    state.favorites = state.favorites.filter(
+      (item) => !(
+        item.name.toLowerCase() === state.city.name.toLowerCase() &&
+        Math.abs(item.latitude - state.city.latitude) < 0.01 &&
+        Math.abs(item.longitude - state.city.longitude) < 0.01
+      )
     );
   } else {
-    favorites.push({ ...currentPlace });
+    state.favorites.push({
+      name: state.city.name,
+      country: state.city.country,
+      latitude: state.city.latitude,
+      longitude: state.city.longitude
+    });
   }
 
   saveFavorites();
@@ -1024,111 +663,314 @@ function toggleFavorite() {
 
 function renderFavorites() {
   const container = $("favorites");
-
   if (!container) return;
 
-  if (!favorites.length) {
-    container.innerHTML =
-      '<span class="muted small">Save a city to see it here.</span>';
-    return;
-  }
+  container.innerHTML = state.favorites.map((city, index) => `
+    <button class="favorite-chip" type="button" data-favorite="${index}">
+      ${escapeHTML(city.name)}
+    </button>
+  `).join("");
 
-  container.innerHTML = "";
-
-  favorites.forEach((place) => {
-    const button = document.createElement("button");
-
-    button.className = "favorite-chip";
-    button.textContent = `${place.name} ×`;
-    button.title = `Open ${place.name}`;
-
+  container.querySelectorAll("[data-favorite]").forEach((button) => {
     button.addEventListener("click", () => {
-      currentPlace = { ...place };
-      loadDashboard();
+      const city = state.favorites[Number(button.dataset.favorite)];
+      if (city) loadWeather(city).catch(console.error);
     });
-
-    container.appendChild(button);
   });
 }
 
-// ============================================
-// TEMPERATURE UNIT
-// ============================================
+function updateFavoriteButton() {
+  const button = $("favorite-button");
+  if (!button) return;
 
-function toggleUnit() {
-  useCelsius = !useCelsius;
+  const favorite = isFavorite(state.city);
 
-  unitToggle.textContent = useCelsius ? "°C" : "°F";
+  button.textContent = favorite ? "★" : "☆";
+  button.setAttribute(
+    "aria-label",
+    favorite ? "Remove from favorites" : "Add to favorites"
+  );
+  button.title = favorite ? "Remove from favorites" : "Add to favorites";
+}
 
-  if (weatherData) {
+/* =========================================
+   BASIC HTML ESCAPING
+========================================= */
+
+function escapeHTML(value) {
+  return String(value).replace(/[&<>"']/g, (character) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;"
+  })[character]);
+}
+
+/* =========================================
+   UNIT TOGGLE
+========================================= */
+
+function toggleUnits() {
+  state.unit = state.unit === "celsius" ? "fahrenheit" : "celsius";
+
+  const button = $("unit-toggle");
+
+  if (button) {
+    button.textContent = state.unit === "celsius" ? "°C" : "°F";
+  }
+
+  if (state.weather) {
     renderDashboard();
   }
 }
 
-// ============================================
-// EVENT LISTENERS
-// ============================================
+/* =========================================
+   USER LOCATION
+========================================= */
 
-function startWeatherApp() {
-  const requiredElements = {
-    "search-form": searchForm,
-    "city-input": cityInput,
-    "location-button": locationButton,
-    "refresh-button": refreshButton,
-    "unit-toggle": unitToggle,
-    "favorite-button": favoriteButton,
-    "status": statusBox,
-    "dashboard": dashboard,
-    "favorites": $("favorites"),
-    "weather-effects": $("weather-effects")
-  };
-
-  const missingElements = Object.entries(requiredElements)
-    .filter(([, element]) => !element)
-    .map(([id]) => `#${id}`);
-
-  if (missingElements.length) {
-    const message =
-      `Weather app setup error. Missing HTML elements: ${missingElements.join(", ")}. Make sure index.html and app.js are from the same version.`;
-
-    console.error(message);
-
-    if (statusBox) {
-      statusBox.textContent = message;
-      statusBox.classList.add("error");
-    }
-
+function useCurrentLocation() {
+  if (!navigator.geolocation) {
+    setStatus("Location services are not supported by this browser.", "error");
     return;
   }
 
-  searchForm.addEventListener("submit", (event) => {
+  setStatus("Getting your current location...");
+
+  navigator.geolocation.getCurrentPosition(
+    async (position) => {
+      const city = {
+        name: "My location",
+        country: "",
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude
+      };
+
+      try {
+        const params = new URLSearchParams({
+          latitude: city.latitude,
+          longitude: city.longitude,
+          count: "1",
+          language: "en",
+          format: "json"
+        });
+
+        const data = await fetchJSON(`${API.geocoding}?${params}`);
+
+        if (data.results?.[0]) {
+          city.name = data.results[0].name;
+          city.country = data.results[0].country || "";
+        }
+
+        await loadWeather(city);
+      } catch (error) {
+        console.error(error);
+        setStatus("Could not load weather for your location.", "error");
+      }
+    },
+    (error) => {
+      console.warn(error);
+
+      if (error.code === error.PERMISSION_DENIED) {
+        setStatus("Location permission was denied. Search for a city instead.", "error");
+      } else {
+        setStatus("Could not determine your location.", "error");
+      }
+    },
+    {
+      enableHighAccuracy: true,
+      timeout: 12000,
+      maximumAge: 300000
+    }
+  );
+}
+
+/* =========================================
+   EARTH GLOBE
+   Requires MapLibre GL JS in index.html.
+========================================= */
+
+function initEarth() {
+  const container = $("earth-globe");
+
+  if (!container) return;
+
+  if (typeof maplibregl === "undefined") {
+    console.error("MapLibre GL JS did not load. Check the MapLibre script in index.html.");
+    container.innerHTML = `
+      <div class="empty-state">
+        Earth globe could not load. Check your internet connection and MapLibre script.
+      </div>
+    `;
+    return;
+  }
+
+  try {
+    state.map = new maplibregl.Map({
+      container: "earth-globe",
+      style: {
+        version: 8,
+        sources: {
+          satellite: {
+            type: "raster",
+            tiles: [
+              "https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2020_3857/default/g/{z}/{y}/{x}.jpg"
+            ],
+            tileSize: 256,
+            attribution: "Satellite imagery © EOX"
+          }
+        },
+        layers: [
+          {
+            id: "satellite-layer",
+            type: "raster",
+            source: "satellite",
+            minzoom: 0,
+            maxzoom: 18
+          }
+        ],
+        projection: {
+          type: "globe"
+        }
+      },
+      center: [0, 20],
+      zoom: 1.4,
+      minZoom: 1,
+      maxZoom: 8,
+      attributionControl: true
+    });
+
+    state.map.addControl(
+      new maplibregl.NavigationControl({
+        showCompass: true,
+        showZoom: true
+      }),
+      "top-right"
+    );
+
+    state.map.on("load", () => {
+      state.mapReady = true;
+
+      try {
+        state.map.setFog({
+          color: "rgb(10, 20, 35)",
+          "high-color": "rgb(30, 75, 120)",
+          "space-color": "rgb(3, 8, 18)",
+          "star-intensity": 0.25
+        });
+      } catch (error) {
+        console.warn("Globe atmosphere could not be enabled:", error);
+      }
+
+      if (state.city) {
+        updateEarthLocation(state.city);
+      }
+    });
+
+    state.map.on("error", (event) => {
+      console.warn("MapLibre map error:", event.error || event);
+    });
+
+  } catch (error) {
+    console.error("Could not initialize the Earth globe:", error);
+    container.innerHTML = `
+      <div class="empty-state">
+        Unable to initialize the Earth globe.
+      </div>
+    `;
+  }
+}
+
+function updateEarthLocation(city) {
+  if (!city) return;
+
+  setText("earth-city", city.name);
+  setText("earth-country", city.country || "Location selected");
+  setText("earth-lat", number(city.latitude, 3));
+  setText("earth-lon", number(city.longitude, 3));
+
+  if (!state.map || !state.mapReady) return;
+
+  const coordinates = [city.longitude, city.latitude];
+
+  if (!state.marker) {
+    state.marker = new maplibregl.Marker({
+      color: "#54c8ff"
+    })
+      .setLngLat(coordinates)
+      .addTo(state.map);
+  } else {
+    state.marker.setLngLat(coordinates);
+  }
+
+  state.map.flyTo({
+    center: coordinates,
+    zoom: 3,
+    speed: 0.8,
+    curve: 1.4,
+    essential: true
+  });
+}
+
+/* =========================================
+   REFRESH
+========================================= */
+
+async function refreshWeather() {
+  if (!state.city) {
+    setStatus("Search for a city first.", "error");
+    return;
+  }
+
+  try {
+    await loadWeather(state.city);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+/* =========================================
+   EVENT LISTENERS
+========================================= */
+
+function setupEventListeners() {
+  const form = $("search-form");
+
+  form?.addEventListener("submit", (event) => {
     event.preventDefault();
-    searchCity(cityInput.value);
+
+    const query = $("city-input")?.value;
+    loadCity(query);
   });
 
-  locationButton.addEventListener("click", useMyLocation);
-  refreshButton.addEventListener("click", loadDashboard);
-  unitToggle.addEventListener("click", toggleUnit);
-  favoriteButton.addEventListener("click", toggleFavorite);
+  $("location-button")?.addEventListener("click", useCurrentLocation);
+  $("refresh-button")?.addEventListener("click", refreshWeather);
+  $("unit-toggle")?.addEventListener("click", toggleUnits);
+  $("favorite-button")?.addEventListener("click", toggleFavorite);
+}
 
+/* =========================================
+   START APPLICATION
+========================================= */
+
+async function startWeatherApp() {
+  setupEventListeners();
   renderFavorites();
-
-  // Initialize the globe once the page elements exist.
   initEarth();
 
-  loadDashboard();
+  const defaultCity = {
+    name: "Helsinki",
+    country: "Finland",
+    latitude: 60.1699,
+    longitude: 24.9384
+  };
+
+  try {
+    await loadWeather(defaultCity);
+  } catch (error) {
+    console.error("Initial weather load failed:", error);
+    setStatus("Weather could not be loaded. Search for a city to try again.", "error");
+  }
 }
 
-// ============================================
-// START THE APP
-// ============================================
-
-if (document.readyState === "loading") {
-  document.addEventListener(
-    "DOMContentLoaded",
-    startWeatherApp,
-    { once: true }
-  );
-} else {
-  startWeatherApp();
-}
+document.addEventListener("DOMContentLoaded", startWeatherApp);
