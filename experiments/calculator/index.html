@@ -1,18 +1,391 @@
 
-<article class="card">
-  <div class="card-icon">🧮</div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#09090f">
+<title>Mini Calculator | Ayush's Lab</title>
 
-  <span class="card-category">JAVASCRIPT TOOL</span>
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-  <h3>Mini Calculator</h3>
+body {
+  min-height: 100vh;
+  background: #09090f;
+  color: #f4f4f8;
+  font-family: Inter, system-ui, sans-serif;
+  padding: 25px;
+}
 
-  <p>
-    Perform calculations with keyboard support
-    and a built-in calculation history.
-  </p>
+a {
+  color: inherit;
+  text-decoration: none;
+}
 
-  <a href="./experiments/calculator/"
-     class="card-link">
-    Open Calculator ↗
-  </a>
-</article>
+.nav {
+  max-width: 1100px;
+  margin: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-size: 23px;
+  font-weight: 900;
+}
+
+.logo span {
+  color: #a78bfa;
+}
+
+.back {
+  color: #b9a2ff;
+  font-size: 14px;
+}
+
+main {
+  width: 100%;
+  max-width: 420px;
+  margin: 65px auto;
+}
+
+.heading {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.heading p {
+  color: #9999aa;
+  margin-top: 8px;
+  font-size: 14px;
+}
+
+.calculator {
+  background: #151520;
+  border: 1px solid #303044;
+  padding: 22px;
+  border-radius: 22px;
+  box-shadow: 0 20px 60px #0008;
+}
+
+.display {
+  background: #0b0b13;
+  border-radius: 13px;
+  padding: 20px;
+  margin-bottom: 20px;
+  text-align: right;
+  min-height: 110px;
+  overflow-wrap: anywhere;
+}
+
+.previous {
+  color: #85859a;
+  font-size: 15px;
+  min-height: 25px;
+}
+
+.current {
+  font-size: 34px;
+  font-weight: 600;
+  margin-top: 8px;
+}
+
+.keys {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 11px;
+}
+
+button {
+  border: none;
+  border-radius: 12px;
+  min-height: 62px;
+  background: #252536;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  transition: .2s;
+}
+
+button:hover {
+  background: #38384e;
+  transform: translateY(-2px);
+}
+
+button:active {
+  transform: scale(.96);
+}
+
+.operator {
+  background: #352b50;
+  color: #c4b5fd;
+}
+
+.clear {
+  background: #552d3d;
+  color: #ffb4c4;
+}
+
+.equal {
+  background: linear-gradient(120deg,#805ad5,#5268d9);
+  grid-column: span 2;
+}
+
+.history {
+  margin-top: 25px;
+  background: #151520;
+  border: 1px solid #303044;
+  border-radius: 15px;
+  padding: 18px;
+}
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.history-header h3 {
+  font-size: 15px;
+}
+
+.history-header button {
+  min-height: auto;
+  background: transparent;
+  color: #b9a2ff;
+  font-size: 12px;
+  padding: 5px;
+}
+
+.history-list {
+  color: #aaaabb;
+  font-size: 13px;
+  display: grid;
+  gap: 9px;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.history-list p {
+  padding: 7px;
+  border-bottom: 1px solid #29293a;
+}
+
+footer {
+  text-align: center;
+  color: #77778a;
+  font-size: 12px;
+  margin-top: 35px;
+}
+
+@media(max-width:450px) {
+  body {
+    padding: 18px;
+  }
+
+  .calculator {
+    padding: 15px;
+  }
+
+  button {
+    min-height: 58px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<nav class="nav">
+  <a href="../../" class="logo">AYUSH<span>.</span></a>
+  <a href="../../" class="back">← Back to Lab</a>
+</nav>
+
+<main>
+
+  <div class="heading">
+    <h1>Mini Calculator 🧮</h1>
+    <p>A simple tool built with curiosity.</p>
+  </div>
+
+  <section class="calculator">
+
+    <div class="display">
+      <div class="previous" id="previous"></div>
+      <div class="current" id="display">0</div>
+    </div>
+
+    <div class="keys">
+      <button class="clear" data-action="clear">AC</button>
+      <button data-action="delete">DEL</button>
+      <button class="operator" data-value="%">%</button>
+      <button class="operator" data-value="/">÷</button>
+
+      <button data-value="7">7</button>
+      <button data-value="8">8</button>
+      <button data-value="9">9</button>
+      <button class="operator" data-value="*">×</button>
+
+      <button data-value="4">4</button>
+      <button data-value="5">5</button>
+      <button data-value="6">6</button>
+      <button class="operator" data-value="-">−</button>
+
+      <button data-value="1">1</button>
+      <button data-value="2">2</button>
+      <button data-value="3">3</button>
+      <button class="operator" data-value="+">+</button>
+
+      <button data-value="0">0</button>
+      <button data-value=".">.</button>
+      <button class="equal" data-action="equals">=</button>
+    </div>
+
+  </section>
+
+  <section class="history">
+    <div class="history-header">
+      <h3>Calculation History</h3>
+      <button id="clearHistory">Clear history</button>
+    </div>
+    <div class="history-list" id="history">
+      <p>No calculations yet.</p>
+    </div>
+  </section>
+
+  <footer>
+    Made with curiosity by Ayush Pandey 🇫🇮
+  </footer>
+
+</main>
+
+<script>
+const display = document.getElementById("display");
+const previous = document.getElementById("previous");
+const historyList = document.getElementById("history");
+
+let expression = "";
+let history = [];
+
+function updateDisplay() {
+  display.textContent = expression || "0";
+}
+
+function calculate() {
+  if (!expression) return;
+
+  try {
+    if (!/^[0-9+\-*/%.() ]+$/.test(expression)) {
+      throw new Error("Invalid expression");
+    }
+
+    const result = Function(
+      '"use strict"; return (' + expression + ')'
+    )();
+
+    if (!Number.isFinite(result)) {
+      throw new Error("Invalid calculation");
+    }
+
+    const formatted = String(
+      Number(result.toPrecision(12))
+    );
+
+    previous.textContent = expression + " =";
+    history.unshift(expression + " = " + formatted);
+    history = history.slice(0, 10);
+
+    renderHistory();
+    expression = formatted;
+    updateDisplay();
+
+  } catch {
+    display.textContent = "Error";
+    expression = "";
+  }
+}
+
+function renderHistory() {
+  historyList.innerHTML = "";
+
+  if (!history.length) {
+    historyList.innerHTML = "<p>No calculations yet.</p>";
+    return;
+  }
+
+  history.forEach(item => {
+    const p = document.createElement("p");
+    p.textContent = item;
+    historyList.appendChild(p);
+  });
+}
+
+document.querySelector(".keys").addEventListener("click", event => {
+  const button = event.target.closest("button");
+  if (!button) return;
+
+  const action = button.dataset.action;
+  const value = button.dataset.value;
+
+  if (action === "clear") {
+    expression = "";
+    previous.textContent = "";
+    updateDisplay();
+    return;
+  }
+
+  if (action === "delete") {
+    expression = expression.slice(0, -1);
+    updateDisplay();
+    return;
+  }
+
+  if (action === "equals") {
+    calculate();
+    return;
+  }
+
+  if (value) {
+    expression += value;
+    updateDisplay();
+  }
+});
+
+document.addEventListener("keydown", event => {
+  if (/^[0-9.+\-*/%()]$/.test(event.key)) {
+    expression += event.key;
+    updateDisplay();
+  }
+
+  if (event.key === "Enter" || event.key === "=") {
+    event.preventDefault();
+    calculate();
+  }
+
+  if (event.key === "Backspace") {
+    expression = expression.slice(0, -1);
+    updateDisplay();
+  }
+
+  if (event.key === "Escape") {
+    expression = "";
+    previous.textContent = "";
+    updateDisplay();
+  }
+});
+
+document.getElementById("clearHistory").addEventListener("click", () => {
+  history = [];
+  renderHistory();
+});
+
+</script>
+
+</body>
+</html>
