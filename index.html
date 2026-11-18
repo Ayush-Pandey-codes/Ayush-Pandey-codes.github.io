@@ -4,113 +4,371 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Ayush's Lab - A playground for experiments, projects and ideas.">
-  <title>Ayush's Lab | Explore. Experiment. Build.</title>
+
+  <title>Ayush Pandey | Developer, Student & Creator</title>
+
+  <meta name="description" content="Welcome to Ayush's Lab. I'm Ayush Pandey, a student at Laurea UAS exploring technology, web development and creative projects.">
+
+  <meta name="author" content="Ayush Pandey">
+  <meta name="theme-color" content="#09090f">
+
+  <meta property="og:title" content="Ayush Pandey | Ayush's Lab">
+  <meta property="og:description" content="Explore. Experiment. Build. Welcome to my digital playground.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://ayushpandey01.com.np/">
+
+  <link rel="icon" href="favicon.png">
   <link rel="stylesheet" href="style.css">
+
+  <script>
+    try {
+      const savedTheme = localStorage.getItem("ayush-theme");
+      if (savedTheme === "light") {
+        document.documentElement.dataset.theme = "light";
+      }
+    } catch (error) {
+      console.warn("Theme preference unavailable.");
+    }
+  </script>
 </head>
+
 <body>
 
+  <!-- NAVIGATION -->
   <nav class="navbar">
-    <a href="#" class="logo">AYUSH<span>.</span></a>
-    <div class="nav-links">
+    <a href="#home" class="logo">AYUSH<span>.</span></a>
+
+    <div class="nav-links" id="navLinks">
       <a href="#about">About</a>
-      <a href="#experiments">Experiments</a>
+      <a href="#experiments">Lab</a>
       <a href="#projects">Projects</a>
       <a href="#contact">Contact</a>
     </div>
-    <a href="#experiments" class="nav-button">Explore Lab ↗</a>
+
+    <div class="nav-actions">
+      <button class="theme-toggle" id="themeToggle"
+        aria-label="Switch color theme" title="Switch theme">
+        ☀
+      </button>
+
+      <a href="#experiments" class="nav-button">Explore Lab ↗</a>
+
+      <button class="menu-toggle" id="menuToggle"
+        aria-label="Open navigation" aria-expanded="false"
+        aria-controls="navLinks">
+        ☰
+      </button>
+    </div>
   </nav>
 
   <main>
-    <section class="hero">
-      <div class="status">
-        <span class="status-dot"></span>
-        WELCOME TO MY DIGITAL PLAYGROUND
+
+    <!-- HERO -->
+    <section class="hero" id="home">
+
+      <div class="hero-content">
+
+        <div class="status">
+          <span class="status-dot"></span>
+          STUDENT · CREATOR · EXPLORER
+        </div>
+
+        <p class="eyebrow">HELLO, WORLD! 👋</p>
+
+        <h1>
+          Terve! I'm
+          <span class="gradient">Ayush Pandey.</span>
+          <br>
+          I love building
+          <span class="gradient">things.</span>
+        </h1>
+
+        <p class="hero-text">
+          A student at Laurea UAS, originally from Nepal,
+          exploring technology, experimenting with code,
+          and turning curious ideas into real projects.
+        </p>
+
+        <div class="hero-actions">
+          <a href="#projects" class="primary-button">
+            Explore My Work ↗
+          </a>
+
+          <a href="#about" class="secondary-button">
+            More About Me
+          </a>
+        </div>
+
+        <div class="location">
+          🇳🇵 Nepal roots <span>·</span> 🇫🇮 Finland journey
+        </div>
+
       </div>
 
-      <h1>
-        Terve! I'm <span class="gradient">Ayush Pandey.</span>
-        <br>Curiosity starts here.
-      </h1>
+      <div class="hero-decoration decoration-one"></div>
+      <div class="hero-decoration decoration-two"></div>
 
-      <p class="hero-text">
-        A student at Laurea UAS, originally from Nepal,
-        exploring technology, experimenting with code,
-        and turning random ideas into something real.
-      </p>
-
-      <div class="hero-actions">
-        <a href="#experiments" class="primary-button">Explore Experiments ↗</a>
-        <a href="#about" class="secondary-button">Get to know me</a>
-      </div>
-
-      <div class="location">
-        🇳🇵 Nepal roots &nbsp;·&nbsp; 🇫🇮 Finland journey
-      </div>
     </section>
 
+
+    <!-- ABOUT -->
     <section class="section" id="about">
+
       <div class="section-label">01 / ABOUT ME</div>
-      <h2>Learning by <span class="gradient">building.</span></h2>
-      <p>
-        This is my corner of the internet. A place where I can
-        test ideas, learn new technologies, break things,
-        fix them, and share what I discover.
-      </p>
+
+      <h2>
+        Learning by
+        <span class="gradient">building.</span>
+      </h2>
+
+      <div class="about-grid">
+
+        <div class="about-text">
+          <p>
+            Welcome to my little corner of the internet!
+          </p>
+
+          <p>
+            I'm Ayush Pandey, originally from Nepal and
+            currently studying at Laurea University of
+            Applied Sciences in Finland.
+          </p>
+
+          <p>
+            I enjoy exploring technology, learning
+            programming, experimenting with web development
+            and discovering how digital things work.
+          </p>
+
+          <p>
+            This website is my personal playground where
+            I share experiments, projects, ideas and
+            everything I learn along the way.
+          </p>
+
+          <a href="#contact" class="text-link">
+            Let's connect ↗
+          </a>
+        </div>
+
+        <div class="about-card">
+
+          <div class="profile-icon">👨‍💻</div>
+
+          <h3>Ayush Pandey</h3>
+
+          <p>Student & Technology Enthusiast</p>
+
+          <div class="about-tags">
+            <span>Technology</span>
+            <span>Web Development</span>
+            <span>Creative Ideas</span>
+            <span>Learning</span>
+          </div>
+
+          <div class="about-location">
+            📍 Finland
+          </div>
+
+        </div>
+
+      </div>
+
     </section>
 
+
+    <!-- EXPERIMENTS -->
     <section class="section" id="experiments">
+
       <div class="section-label">02 / THE PLAYGROUND</div>
-      <h2>Things I'm <span class="gradient">experimenting with.</span></h2>
+
+      <h2>
+        Welcome to my
+        <span class="gradient">Lab.</span>
+      </h2>
+
+      <p class="section-description">
+        Small experiments, useful tools and creative
+        things built while learning.
+      </p>
 
       <div class="cards">
+
         <article class="card">
           <div class="card-icon">🎨</div>
+
+          <span class="card-category">DESIGN TOOL</span>
+
           <h3>Color Playground</h3>
-          <p>Explore colors and generate beautiful palettes.</p>
-          <a href="#" class="coming-soon">Coming soon ↗</a>
+
+          <p>
+            Generate beautiful colors, explore palettes
+            and discover combinations.
+          </p>
+
+          <a href="./experiments/color-generator/"
+             class="card-link">
+            Open Experiment ↗
+          </a>
         </article>
 
         <article class="card">
           <div class="card-icon">🧮</div>
+
+          <span class="card-category">COMING NEXT</span>
+
           <h3>Mini Calculator</h3>
-          <p>A simple interactive JavaScript experiment.</p>
-          <a href="#" class="coming-soon">Coming soon ↗</a>
+
+          <p>
+            A useful calculator built with JavaScript.
+            Simple, interactive and practical.
+          </p>
+
+          <span class="coming-soon">Under development</span>
         </article>
 
         <article class="card">
-          <div class="card-icon">✨</div>
-          <h3>Creative Lab</h3>
-          <p>Animations, visual ideas and random creations.</p>
-          <a href="#" class="coming-soon">Coming soon ↗</a>
+          <div class="card-icon">🔐</div>
+
+          <span class="card-category">COMING NEXT</span>
+
+          <h3>Password Generator</h3>
+
+          <p>
+            Create strong random passwords with
+            customizable settings.
+          </p>
+
+          <span class="coming-soon">Under development</span>
         </article>
+
       </div>
+
     </section>
 
+
+    <!-- PROJECTS -->
     <section class="section" id="projects">
-      <div class="section-label">03 / PROJECTS</div>
-      <h2>Built with <span class="gradient">curiosity.</span></h2>
-      <p>Small steps, new skills, and projects along the way.</p>
-      <div class="project-placeholder">
-        🚀 More projects are on the way.
+
+      <div class="section-label">03 / MY PROJECTS</div>
+
+      <h2>
+        Built with
+        <span class="gradient">curiosity.</span>
+      </h2>
+
+      <p class="section-description">
+        Every project is an opportunity to learn
+        something new.
+      </p>
+
+      <div class="project-card">
+
+        <div class="project-visual">
+          <span>🎨</span>
+          <div class="project-visual-text">
+            COLOR PLAYGROUND
+          </div>
+        </div>
+
+        <div class="project-info">
+
+          <span class="card-category">WEB DEVELOPMENT</span>
+
+          <h3>Color Generator</h3>
+
+          <p>
+            An interactive color exploration tool
+            where users can discover colors and
+            create beautiful palettes.
+          </p>
+
+          <div class="project-tags">
+            <span>HTML</span>
+            <span>CSS</span>
+            <span>JavaScript</span>
+          </div>
+
+          <a href="./experiments/color-generator/"
+             class="card-link">
+            View Project ↗
+          </a>
+
+        </div>
+
       </div>
+
+      <div class="github-banner">
+
+        <div>
+          <h3>More projects on GitHub</h3>
+          <p>Follow my journey and explore what I'm building.</p>
+        </div>
+
+        <a href="https://github.com/Ayush-Pandey-codes"
+           target="_blank" rel="noopener noreferrer"
+           class="secondary-button">
+          Visit GitHub ↗
+        </a>
+
+      </div>
+
     </section>
 
+
+    <!-- CONTACT -->
     <section class="section contact" id="contact">
+
       <div class="section-label">04 / SAY HELLO</div>
-      <h2>Have an idea? <span class="gradient">Let's connect.</span></h2>
-      <p>I'm always curious about interesting ideas and collaborations.</p>
-      <a href="mailto:ayushpandey1d@gmail.com" class="primary-button">
-        Send me an email ↗
+
+      <h2>
+        Have an idea?
+        <span class="gradient">Let's connect.</span>
+      </h2>
+
+      <p>
+        I'm always curious about interesting ideas,
+        new opportunities and collaborations.
+      </p>
+
+      <a href="mailto:ayushpandey1d@gmail.com"
+         class="primary-button">
+        Send Me an Email ↗
       </a>
+
+      <div class="social-links">
+
+        <a href="https://github.com/Ayush-Pandey-codes"
+           target="_blank" rel="noopener noreferrer">
+          GitHub ↗
+        </a>
+
+        <a href="mailto:ayushpandey1d@gmail.com">
+          Email ↗
+        </a>
+
+      </div>
+
     </section>
+
   </main>
 
+
+  <!-- FOOTER -->
   <footer>
-    <a href="#" class="logo">AYUSH<span>.</span></a>
-    <p>Made with curiosity in Finland 🇫🇮 · © 2026 Ayush Pandey</p>
+
+    <a href="#home" class="logo">AYUSH<span>.</span></a>
+
+    <p>
+      Made with curiosity in Finland 🇫🇮
+      · © <span id="year">2026</span> Ayush Pandey
+    </p>
+
+    <a href="#home" class="back-top">Back to top ↑</a>
+
   </footer>
 
   <script src="script.js"></script>
+
 </body>
 </html>
