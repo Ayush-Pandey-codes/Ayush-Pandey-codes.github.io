@@ -17,12 +17,14 @@
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://ayushpandey01.com.np/">
 
-  <link rel="icon" href="favicon.png">
-  <link rel="stylesheet" href="style.css">
+  <link rel="canonical" href="https://ayushpandey01.com.np/">
+  <link rel="icon" href="./favicon.png">
+  <link rel="stylesheet" href="./style.css">
 
   <script>
     try {
       const savedTheme = localStorage.getItem("ayush-theme");
+
       if (savedTheme === "light") {
         document.documentElement.dataset.theme = "light";
       }
@@ -46,20 +48,27 @@
     </div>
 
     <div class="nav-actions">
+
       <button class="theme-toggle" id="themeToggle"
-        aria-label="Switch color theme" title="Switch theme">
+        aria-label="Switch color theme"
+        title="Switch theme">
         ☀
       </button>
 
-      <a href="#experiments" class="nav-button">Explore Lab ↗</a>
+      <a href="#experiments" class="nav-button">
+        Explore Lab ↗
+      </a>
 
       <button class="menu-toggle" id="menuToggle"
-        aria-label="Open navigation" aria-expanded="false"
+        aria-label="Open navigation"
+        aria-expanded="false"
         aria-controls="navLinks">
         ☰
       </button>
+
     </div>
   </nav>
+
 
   <main>
 
@@ -90,6 +99,7 @@
         </p>
 
         <div class="hero-actions">
+
           <a href="#projects" class="primary-button">
             Explore My Work ↗
           </a>
@@ -97,6 +107,7 @@
           <a href="#about" class="secondary-button">
             More About Me
           </a>
+
         </div>
 
         <div class="location">
@@ -124,6 +135,7 @@
       <div class="about-grid">
 
         <div class="about-text">
+
           <p>
             Welcome to my little corner of the internet!
           </p>
@@ -149,6 +161,7 @@
           <a href="#contact" class="text-link">
             Let's connect ↗
           </a>
+
         </div>
 
         <div class="about-card">
@@ -194,7 +207,9 @@
 
       <div class="cards">
 
+        <!-- COLOR GENERATOR -->
         <article class="card">
+
           <div class="card-icon">🎨</div>
 
           <span class="card-category">DESIGN TOOL</span>
@@ -203,31 +218,42 @@
 
           <p>
             Generate beautiful colors, explore palettes
-            and discover combinations.
+            and discover amazing combinations.
           </p>
 
           <a href="./experiments/color-generator/"
              class="card-link">
-            Open Experiment ↗
+            Open Color Generator ↗
           </a>
+
         </article>
 
+
+        <!-- CALCULATOR -->
         <article class="card">
+
           <div class="card-icon">🧮</div>
 
-          <span class="card-category">COMING NEXT</span>
+          <span class="card-category">JAVASCRIPT TOOL</span>
 
           <h3>Mini Calculator</h3>
 
           <p>
-            A useful calculator built with JavaScript.
-            Simple, interactive and practical.
+            Perform calculations with keyboard support
+            and built-in calculation history.
           </p>
 
-          <span class="coming-soon">Under development</span>
+          <a href="./experiments/calculator/"
+             class="card-link">
+            Open Calculator ↗
+          </a>
+
         </article>
 
+
+        <!-- PASSWORD GENERATOR -->
         <article class="card">
+
           <div class="card-icon">🔐</div>
 
           <span class="card-category">COMING NEXT</span>
@@ -239,7 +265,31 @@
             customizable settings.
           </p>
 
-          <span class="coming-soon">Under development</span>
+          <span class="coming-soon">
+            Coming soon
+          </span>
+
+        </article>
+
+
+        <!-- CREATIVE LAB -->
+        <article class="card">
+
+          <div class="card-icon">✨</div>
+
+          <span class="card-category">COMING SOON</span>
+
+          <h3>Creative Lab</h3>
+
+          <p>
+            Explore animations, visual experiments
+            and creative coding projects.
+          </p>
+
+          <span class="coming-soon">
+            Coming soon
+          </span>
+
         </article>
 
       </div>
@@ -262,10 +312,13 @@
         something new.
       </p>
 
+
+      <!-- COLOR PROJECT -->
       <div class="project-card">
 
         <div class="project-visual">
           <span>🎨</span>
+
           <div class="project-visual-text">
             COLOR PLAYGROUND
           </div>
@@ -273,7 +326,9 @@
 
         <div class="project-info">
 
-          <span class="card-category">WEB DEVELOPMENT</span>
+          <span class="card-category">
+            WEB DEVELOPMENT
+          </span>
 
           <h3>Color Generator</h3>
 
@@ -298,15 +353,62 @@
 
       </div>
 
+
+      <!-- CALCULATOR PROJECT -->
+      <div class="project-card">
+
+        <div class="project-visual">
+          <span>🧮</span>
+
+          <div class="project-visual-text">
+            MINI CALCULATOR
+          </div>
+        </div>
+
+        <div class="project-info">
+
+          <span class="card-category">
+            JAVASCRIPT PROJECT
+          </span>
+
+          <h3>Mini Calculator</h3>
+
+          <p>
+            A responsive calculator with mathematical
+            operations, keyboard support and calculation
+            history.
+          </p>
+
+          <div class="project-tags">
+            <span>HTML</span>
+            <span>CSS</span>
+            <span>JavaScript</span>
+          </div>
+
+          <a href="./experiments/calculator/"
+             class="card-link">
+            View Calculator ↗
+          </a>
+
+        </div>
+
+      </div>
+
+
+      <!-- GITHUB -->
       <div class="github-banner">
 
         <div>
           <h3>More projects on GitHub</h3>
-          <p>Follow my journey and explore what I'm building.</p>
+
+          <p>
+            Follow my journey and explore what I'm building.
+          </p>
         </div>
 
         <a href="https://github.com/Ayush-Pandey-codes"
-           target="_blank" rel="noopener noreferrer"
+           target="_blank"
+           rel="noopener noreferrer"
            class="secondary-button">
           Visit GitHub ↗
         </a>
@@ -339,7 +441,8 @@
       <div class="social-links">
 
         <a href="https://github.com/Ayush-Pandey-codes"
-           target="_blank" rel="noopener noreferrer">
+           target="_blank"
+           rel="noopener noreferrer">
           GitHub ↗
         </a>
 
@@ -357,18 +460,23 @@
   <!-- FOOTER -->
   <footer>
 
-    <a href="#home" class="logo">AYUSH<span>.</span></a>
+    <a href="#home" class="logo">
+      AYUSH<span>.</span>
+    </a>
 
     <p>
       Made with curiosity in Finland 🇫🇮
       · © <span id="year">2026</span> Ayush Pandey
     </p>
 
-    <a href="#home" class="back-top">Back to top ↑</a>
+    <a href="#home" class="back-top">
+      Back to top ↑
+    </a>
 
   </footer>
 
-  <script src="script.js"></script>
+
+  <script src="./script.js"></script>
 
 </body>
 </html>
