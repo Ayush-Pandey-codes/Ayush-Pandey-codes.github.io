@@ -105,7 +105,11 @@ function formatTime(dateString) {
 }
 
 function number(value, digits = 0) {
-  if (value === null || value === undefined || !Number.isFinite(Number(value))) {
+  if (
+    value === null ||
+    value === undefined ||
+    !Number.isFinite(Number(value))
+  ) {
     return "--";
   }
 
@@ -208,6 +212,7 @@ async function loadWeather(city) {
     longitude: city.longitude,
     timezone: "auto",
     forecast_days: "7",
+
     hourly: [
       "temperature_2m",
       "relative_humidity_2m",
@@ -216,6 +221,7 @@ async function loadWeather(city) {
       "wind_speed_10m",
       "is_day"
     ].join(","),
+
     daily: [
       "weather_code",
       "temperature_2m_max",
@@ -225,6 +231,7 @@ async function loadWeather(city) {
       "uv_index_max",
       "precipitation_probability_max"
     ].join(","),
+
     current: [
       "temperature_2m",
       "relative_humidity_2m",
@@ -252,6 +259,7 @@ async function loadWeather(city) {
     });
 
     setStatus(`Weather updated for ${city.name}.`, "success");
+
   } catch (error) {
     console.error(error);
     setStatus("Unable to load weather data. Please try again.", "error");
@@ -279,11 +287,15 @@ function renderDashboard() {
 
   if ($("current-date")) {
     $("current-date").textContent = formatDate(
-      current.time?.slice(0, 10) || new Date().toISOString().slice(0, 10)
+      current.time?.slice(0, 10) ||
+      new Date().toISOString().slice(0, 10)
     );
   }
 
-  const info = getWeatherInfo(current.weather_code, current.is_day === 1);
+  const info = getWeatherInfo(
+    current.weather_code,
+    current.is_day === 1
+  );
 
   if ($("temperature")) {
     $("temperature").textContent = temperature(current.temperature_2m);
@@ -336,7 +348,10 @@ function renderUV(value) {
     setText("uv-label", "Unavailable");
     setText("uv-advice", "UV information is currently unavailable.");
 
-    if ($("uv-meter")) $("uv-meter").style.width = "0%";
+    if ($("uv-meter")) {
+      $("uv-meter").style.width = "0%";
+    }
+
     return;
   }
 
@@ -497,10 +512,14 @@ function renderChart() {
   });
 
   const line = points
-    .map((point, index) => `${index === 0 ? "M" : "L"} ${point.x} ${point.y}`)
+    .map((point, index) =>
+      `${index === 0 ? "M" : "L"} ${point.x} ${point.y}`
+    )
     .join(" ");
 
-  const area = `${line} L ${points[points.length - 1].x} ${height} L ${points[0].x} ${height} Z`;
+  const area =
+    `${line} L ${points[points.length - 1].x} ${height} ` +
+    `L ${points[0].x} ${height} Z`;
 
   svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
 
@@ -530,7 +549,6 @@ function renderChart() {
   if (labels) {
     labels.innerHTML = points.map((point, index) => {
       const time = hourly.time[start + index];
-
       return `<span>${formatTime(time)}</span>`;
     }).join("");
   }
@@ -623,7 +641,10 @@ function loadFavorites() {
 }
 
 function saveFavorites() {
-  localStorage.setItem("weatherFavorites", JSON.stringify(state.favorites));
+  localStorage.setItem(
+    "weatherFavorites",
+    JSON.stringify(state.favorites)
+  );
 }
 
 function isFavorite(city) {
@@ -675,7 +696,10 @@ function renderFavorites() {
   container.querySelectorAll("[data-favorite]").forEach((button) => {
     button.addEventListener("click", () => {
       const city = state.favorites[Number(button.dataset.favorite)];
-      if (city) loadWeather(city).catch(console.error);
+
+      if (city) {
+        loadWeather(city).catch(console.error);
+      }
     });
   });
 }
@@ -687,10 +711,12 @@ function updateFavoriteButton() {
   const favorite = isFavorite(state.city);
 
   button.textContent = favorite ? "★" : "☆";
+
   button.setAttribute(
     "aria-label",
     favorite ? "Remove from favorites" : "Add to favorites"
   );
+
   button.title = favorite ? "Remove from favorites" : "Add to favorites";
 }
 
@@ -718,7 +744,8 @@ function toggleUnits() {
   const button = $("unit-toggle");
 
   if (button) {
-    button.textContent = state.unit === "celsius" ? "°C" : "°F";
+    button.textContent =
+      state.unit === "celsius" ? "°C" : "°F";
   }
 
   if (state.weather) {
@@ -732,7 +759,10 @@ function toggleUnits() {
 
 function useCurrentLocation() {
   if (!navigator.geolocation) {
-    setStatus("Location services are not supported by this browser.", "error");
+    setStatus(
+      "Location services are not supported by this browser.",
+      "error"
+    );
     return;
   }
 
@@ -756,7 +786,9 @@ function useCurrentLocation() {
           format: "json"
         });
 
-        const data = await fetchJSON(`${API.geocoding}?${params}`);
+        const data = await fetchJSON(
+          `${API.geocoding}?${params}`
+        );
 
         if (data.results?.[0]) {
           city.name = data.results[0].name;
@@ -764,20 +796,32 @@ function useCurrentLocation() {
         }
 
         await loadWeather(city);
+
       } catch (error) {
         console.error(error);
-        setStatus("Could not load weather for your location.", "error");
+        setStatus(
+          "Could not load weather for your location.",
+          "error"
+        );
       }
     },
+
     (error) => {
       console.warn(error);
 
       if (error.code === error.PERMISSION_DENIED) {
-        setStatus("Location permission was denied. Search for a city instead.", "error");
+        setStatus(
+          "Location permission was denied. Search for a city instead.",
+          "error"
+        );
       } else {
-        setStatus("Could not determine your location.", "error");
+        setStatus(
+          "Could not determine your location.",
+          "error"
+        );
       }
     },
+
     {
       enableHighAccuracy: true,
       timeout: 12000,
@@ -788,7 +832,7 @@ function useCurrentLocation() {
 
 /* =========================================
    EARTH GLOBE
-   Requires MapLibre GL JS in index.html.
+   MapLibre GL JS 5.6.2
 ========================================= */
 
 function initEarth() {
@@ -797,7 +841,9 @@ function initEarth() {
   if (!container) return;
 
   if (typeof maplibregl === "undefined") {
-    console.error("MapLibre GL JS did not load. Check the MapLibre script in index.html.");
+    console.error(
+      "MapLibre GL JS did not load. Check the MapLibre script in index.html."
+    );
 
     container.innerHTML = `
       <div class="empty-state">
@@ -859,15 +905,26 @@ function initEarth() {
     );
 
     /* =====================================
-       FIXED GLOBE ATMOSPHERE
+       MAP LOAD EVENT
 
-       MapLibre uses setSky().
-       Do NOT use setFog() here.
+       1. Remove loading message.
+       2. Enable supported atmosphere.
+       3. Resize responsive map.
+       4. Move to selected city.
     ===================================== */
 
     state.map.on("load", () => {
       state.mapReady = true;
 
+      // Remove the permanent HTML loading message.
+      const loadingLabel =
+        container.querySelector(".earth-loading");
+
+      if (loadingLabel) {
+        loadingLabel.remove();
+      }
+
+      // MapLibre uses setSky(), not Mapbox's setFog().
       try {
         if (typeof state.map.setSky === "function") {
           state.map.setSky({
@@ -880,25 +937,44 @@ function initEarth() {
             "atmosphere-blend": 1.0
           });
         } else {
-          console.warn(
-            "This MapLibre version does not support setSky(). Globe atmosphere was skipped."
+          console.info(
+            "MapLibre setSky() is unavailable; continuing without custom atmosphere."
           );
         }
       } catch (error) {
-        console.warn("Globe atmosphere could not be enabled:", error);
+        console.warn(
+          "Globe atmosphere could not be enabled; the globe will continue:",
+          error
+        );
       }
 
-      if (state.city) {
-        updateEarthLocation(state.city);
-      }
+      // Recalculate dimensions after the responsive panel renders.
+      requestAnimationFrame(() => {
+        if (state.map) {
+          state.map.resize();
+        }
+
+        if (state.city) {
+          updateEarthLocation(state.city);
+        }
+      });
+
+      console.info("3D Earth map loaded successfully.");
     });
 
+    // Report tile and WebGL errors without stopping the weather app.
     state.map.on("error", (event) => {
-      console.warn("MapLibre map error:", event.error || event);
+      console.warn(
+        "MapLibre map/tile error:",
+        event.error || event
+      );
     });
 
   } catch (error) {
-    console.error("Could not initialize the Earth globe:", error);
+    console.error(
+      "Could not initialize the Earth globe:",
+      error
+    );
 
     container.innerHTML = `
       <div class="empty-state">
@@ -922,7 +998,10 @@ function updateEarthLocation(city) {
 
   if (!state.map || !state.mapReady) return;
 
-  const coordinates = [city.longitude, city.latitude];
+  const coordinates = [
+    city.longitude,
+    city.latitude
+  ];
 
   if (!state.marker) {
     state.marker = new maplibregl.Marker({
@@ -930,6 +1009,7 @@ function updateEarthLocation(city) {
     })
       .setLngLat(coordinates)
       .addTo(state.map);
+
   } else {
     state.marker.setLngLat(coordinates);
   }
@@ -974,10 +1054,25 @@ function setupEventListeners() {
     loadCity(query);
   });
 
-  $("location-button")?.addEventListener("click", useCurrentLocation);
-  $("refresh-button")?.addEventListener("click", refreshWeather);
-  $("unit-toggle")?.addEventListener("click", toggleUnits);
-  $("favorite-button")?.addEventListener("click", toggleFavorite);
+  $("location-button")?.addEventListener(
+    "click",
+    useCurrentLocation
+  );
+
+  $("refresh-button")?.addEventListener(
+    "click",
+    refreshWeather
+  );
+
+  $("unit-toggle")?.addEventListener(
+    "click",
+    toggleUnits
+  );
+
+  $("favorite-button")?.addEventListener(
+    "click",
+    toggleFavorite
+  );
 }
 
 /* =========================================
@@ -998,6 +1093,7 @@ async function startWeatherApp() {
 
   try {
     await loadWeather(defaultCity);
+
   } catch (error) {
     console.error("Initial weather load failed:", error);
 
@@ -1008,4 +1104,7 @@ async function startWeatherApp() {
   }
 }
 
-document.addEventListener("DOMContentLoaded", startWeatherApp);
+document.addEventListener(
+  "DOMContentLoaded",
+  startWeatherApp
+);
