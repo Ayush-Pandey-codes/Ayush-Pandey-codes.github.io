@@ -3,15 +3,14 @@
 // WEATHER INTELLIGENCE 3.0
 // Weather + Air Quality + Forecasts + 3D Earth
 // Data: Open-Meteo
-// Globe: Globe.gl
+// Globe: MapLibre GL
 // ============================================
 
 const WEATHER_API = "https://api.open-meteo.com/v1/forecast";
 const AIR_API = "https://air-quality-api.open-meteo.com/v1/air-quality";
 const GEO_API = "https://geocoding-api.open-meteo.com/v1/search";
 
-const EARTH_TEXTURE =
-  "https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg";
+// Satellite tiles: EOX Sentinel-2 cloudless mosaic (2020).
 
 // App state
 let currentPlace = {
@@ -32,9 +31,9 @@ let dashboardRequestId = 0;
 let citySearchRequestId = 0;
 
 // Globe state
-let earthGlobe = null;
+let earthMap = null;
+let earthMarker = null;
 let earthInitialized = false;
-let earthResizeHandler = null;
 
 // ============================================
 // ELEMENTS
@@ -742,80 +741,78 @@ function updateWeatherEffects() {
 // ============================================
 
 function initEarth() {
-  const globeContainer = $("earth-globe");
-
-  if (!globeContainer) {
-    console.warn("Earth globe container was not found.");
-    return;
-  }
-
-  if (earthInitialized) {
+  const container = $("earth-globe");
+  const mode = $("earth-mode");
+  if (!container) return;
+  if (earthInitialized && earthMap) {
     updateEarthLocation();
     return;
   }
-
-  if (typeof Globe !== "function") {
-    console.warn(
-      "Globe.gl did not load. Check the Globe.gl script in index.html."
-    );
-
-    const mode = $("earth-mode");
-    if (mode) mode.textContent = "3D globe unavailable";
-
+  if (typeof maplibregl === "undefined") {
+    if (mode) mode.textContent = "Satellite globe unavailable";
+    container.innerHTML = '<p class="earth-loading">Could not load the map library. Check your internet connection.</p>';
     return;
   }
 
   try {
-    earthGlobe = Globe()(globeContainer)
-      .globeImageUrl(EARTH_TEXTURE)
-      .backgroundColor("rgba(0,0,0,0)")
-      .showAtmosphere(true)
-      .atmosphereColor("#7caaff")
-      .atmosphereAltitude(0.18)
-      .pointAltitude(0.025)
-      .pointRadius(0.65)
-      .pointColor(() => "#ffbd72")
-      .pointResolution(24)
-      .pointsData([])
-      .pointLabel(point => point.label || "Selected location")
-      .width(globeContainer.clientWidth)
-      .height(globeContainer.clientHeight);
+    earthMap = new maplibregl.Map({
+      container,
+      projection: { type: "globe" },
+      style: {
+        version: 8,
+        sources: {
+          satellite: {
+            type: "raster",
+            tiles: [
+              "https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2020_3857/default/g/{z}/{y}/{x}.jpg"
+            ],
+            tileSize: 256,
+            maxzoom: 14,
+            attribution: 'Satellite imagery: <a href="https://s2maps.eu" target="_blank" rel="noreferrer">Sentinel-2 cloudless / EOX</a> (2020)'
+          }
+        },
+        layers: [
+          { id: "satellite-imagery", type: "raster", source: "satellite",
+            paint: { "raster-fade-duration": 250, "raster-saturation": 0.12 } }
+        ],
+        light: {
+          anchor: "map",
+          color: "#ffffff",
+          intensity: 0.42,
+          position: [1.5, 210, 35]
+        }
+      },
+      center: [currentPlace.longitude, currentPlace.latitude],
+      zoom: 1.25,
+      minZoom: 0.8,
+      maxZoom: 14,
+      dragRotate: true,
+      touchPitch: true,
+      attributionControl: true
+    });
 
-    // Set initial camera position and zoom.
-    earthGlobe.pointOfView({
-      lat: currentPlace.latitude,
-      lng: currentPlace.longitude,
-      altitude: 2.1
-    }, 0);
+    earthMap.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), "top-right");
+    earthMap.addControl(new maplibregl.ScaleControl({ maxWidth: 100, unit: "metric" }), "bottom-left");
 
-    // Enable natural globe controls.
-    const controls = earthGlobe.controls();
+    earthMap.on("load", () => {
+      const markerElement = document.createElement("div");
+      markerElement.className = "earth-marker";
+      markerElement.setAttribute("aria-label", "Selected weather location");
+      earthMarker = new maplibregl.Marker({ element: markerElement, anchor: "center" })
+        .setLngLat([currentPlace.longitude, currentPlace.latitude])
+        .addTo(earthMap);
+      updateEarthLocation();
+      if (mode) mode.textContent = "🌍 SATELLITE GLOBE READY";
+    });
 
-    controls.autoRotate = true;
-    controls.autoRotateSpeed = 0.35;
-    controls.enableZoom = true;
-    controls.minDistance = 120;
-    controls.maxDistance = 500;
+    earthMap.on("error", (event) => {
+      console.warn("Earth map tile or style error:", event.error || event);
+      if (mode && !earthMap.loaded()) mode.textContent = "Loading satellite imagery…";
+    });
 
     earthInitialized = true;
-
-    // Update size when the browser window changes size.
-    earthResizeHandler = () => {
-      if (!earthGlobe || !globeContainer) return;
-
-      earthGlobe
-        .width(globeContainer.clientWidth)
-        .height(globeContainer.clientHeight);
-    };
-
-    window.addEventListener("resize", earthResizeHandler);
-
-    updateEarthLocation();
-
   } catch (error) {
-    console.error("Could not initialize the 3D Earth:", error);
-
-    const mode = $("earth-mode");
+    console.error("Could not initialize satellite globe:", error);
     if (mode) mode.textContent = "Globe initialization failed";
   }
 }
@@ -827,58 +824,54 @@ function updateEarthLocation() {
   const longitudeElement = $("earth-lon");
   const modeElement = $("earth-mode");
 
-  if (cityElement) {
-    cityElement.textContent = currentPlace.name;
-  }
+  if (cityElement) cityElement.textContent = currentPlace.name;
+  if (countryElement) countryElement.textContent = currentPlace.country || "Selected location";
+  if (latitudeElement) latitudeElement.textContent = `${Number(currentPlace.latitude).toFixed(4)}°`;
+  if (longitudeElement) longitudeElement.textContent = `${Number(currentPlace.longitude).toFixed(4)}°`;
 
-  if (countryElement) {
-    countryElement.textContent = currentPlace.country || "Selected location";
-  }
-
-  if (latitudeElement) {
-    latitudeElement.textContent =
-      `${Number(currentPlace.latitude).toFixed(4)}°`;
-  }
-
-  if (longitudeElement) {
-    longitudeElement.textContent =
-      `${Number(currentPlace.longitude).toFixed(4)}°`;
-  }
-
-  if (!earthInitialized || !earthGlobe) {
+  if (!earthInitialized || !earthMap) {
     initEarth();
     return;
   }
 
-  const isDay = weatherData?.current?.is_day === 1;
-
-  if (modeElement) {
-    modeElement.textContent = isDay
-      ? "☀ Local daytime"
-      : "🌙 Local nighttime";
+  if (earthMarker) {
+    earthMarker.setLngLat([currentPlace.longitude, currentPlace.latitude]);
   }
 
-  // Change globe appearance slightly based on local daytime.
-  earthGlobe
-    .globeImageUrl(EARTH_TEXTURE)
-    .atmosphereColor(isDay ? "#91caff" : "#5369b8")
-    .atmosphereAltitude(isDay ? 0.19 : 0.13);
+  // Move the globe's directional light to the Sun's approximate subsolar point.
+  // MapLibre shades the globe according to this light direction, creating a real
+  // moving day/night terminator rather than merely changing the atmosphere color.
+  const now = new Date();
+  const dayOfYear = Math.floor((Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()) -
+    Date.UTC(now.getUTCFullYear(), 0, 0)) / 86400000);
+  const fractionalHour = now.getUTCHours() + now.getUTCMinutes() / 60 + now.getUTCSeconds() / 3600;
+  const declination = 23.44 * Math.sin((2 * Math.PI / 365) * (dayOfYear - 81));
+  const solarLongitude = ((180 - fractionalHour * 15 + 540) % 360) - 180;
+  if (typeof earthMap.setLight === "function") {
+    earthMap.setLight({
+      anchor: "map",
+      color: "#ffffff",
+      intensity: 0.62,
+      position: [1.5, solarLongitude, 90 - declination]
+    });
+  }
 
-  // Move the globe's focus to the selected city.
-  earthGlobe.pointOfView({
-    lat: currentPlace.latitude,
-    lng: currentPlace.longitude,
-    altitude: 2.1
-  }, 1200);
+  // Fly to the chosen city while retaining a useful regional zoom level.
+  earthMap.flyTo({
+    center: [currentPlace.longitude, currentPlace.latitude],
+    zoom: 4.2,
+    pitch: 18,
+    bearing: 0,
+    duration: 1800,
+    essential: true
+  });
 
-  // Add a marker at the selected city's coordinates.
-  earthGlobe.pointsData([
-    {
-      lat: currentPlace.latitude,
-      lng: currentPlace.longitude,
-      label: `${currentPlace.name}, ${currentPlace.country}`
-    }
-  ]);
+  const isDay = weatherData?.current?.is_day === 1;
+  if (modeElement) {
+    modeElement.textContent = isDay
+      ? "☀ SELECTED LOCATION · DAYTIME"
+      : "🌙 SELECTED LOCATION · NIGHTTIME";
+  }
 }
 
 // ============================================
