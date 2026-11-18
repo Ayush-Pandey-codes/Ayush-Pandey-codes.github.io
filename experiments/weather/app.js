@@ -1,3 +1,4 @@
+
 // ============================================
 // WEATHER INTELLIGENCE 2.0
 // Weather + Air Quality + Forecasts
@@ -8,7 +9,10 @@ const WEATHER_API = "https://api.open-meteo.com/v1/forecast";
 const AIR_API = "https://air-quality-api.open-meteo.com/v1/air-quality";
 const GEO_API = "https://geocoding-api.open-meteo.com/v1/search";
 
-// App state
+// ============================================
+// APP STATE
+// ============================================
+
 let currentPlace = {
   name: "Helsinki",
   country: "Finland",
@@ -21,13 +25,12 @@ let airData = null;
 let useCelsius = true;
 let favorites = loadFavorites();
 
-// Request counters prevent outdated searches or API responses
-// from replacing the newest selected location.
 let dashboardRequestId = 0;
 let citySearchRequestId = 0;
 
 // ============================================
-// ELEMENTS
+// HTML ELEMENTS
+// IMPORTANT: IDs MUST MATCH index.html
 // ============================================
 
 const $ = (id) => document.getElementById(id);
@@ -85,6 +88,8 @@ function getWeatherInfo(code, isDay = true) {
 // ============================================
 
 function setStatus(message, isError = false) {
+  if (!statusBox) return;
+
   statusBox.textContent = message;
   statusBox.classList.toggle("error", isError);
 }
@@ -95,7 +100,11 @@ function round(value) {
 
 function temperature(value) {
   if (value == null) return "--°";
-  const converted = useCelsius ? value : (value * 9 / 5) + 32;
+
+  const converted = useCelsius
+    ? value
+    : (value * 9 / 5) + 32;
+
   return `${Math.round(converted)}°`;
 }
 
@@ -215,6 +224,7 @@ async function fetchWeather(place = currentPlace) {
     longitude,
     timezone: "auto",
     forecast_days: "7",
+
     current: [
       "temperature_2m",
       "relative_humidity_2m",
@@ -225,12 +235,14 @@ async function fetchWeather(place = currentPlace) {
       "wind_direction_10m",
       "is_day"
     ].join(","),
+
     hourly: [
       "temperature_2m",
       "precipitation_probability",
       "weather_code",
       "uv_index"
     ].join(","),
+
     daily: [
       "weather_code",
       "temperature_2m_max",
@@ -241,7 +253,10 @@ async function fetchWeather(place = currentPlace) {
     ].join(",")
   });
 
-  const response = await fetch(`${WEATHER_API}?${params}`);
+  const response = await fetch(
+    `${WEATHER_API}?${params}`,
+    { signal: AbortSignal.timeout(15000) }
+  );
 
   if (!response.ok) {
     throw new Error("Could not retrieve weather data.");
@@ -262,6 +277,7 @@ async function fetchAirQuality(place = currentPlace) {
     longitude,
     timezone: "auto",
     forecast_days: "5",
+
     hourly: [
       "us_aqi",
       "pm2_5",
@@ -271,7 +287,10 @@ async function fetchAirQuality(place = currentPlace) {
     ].join(",")
   });
 
-  const response = await fetch(`${AIR_API}?${params}`);
+  const response = await fetch(
+    `${AIR_API}?${params}`,
+    { signal: AbortSignal.timeout(15000) }
+  );
 
   if (!response.ok) {
     throw new Error("Air quality service is temporarily unavailable.");
@@ -285,33 +304,33 @@ async function fetchAirQuality(place = currentPlace) {
 // ============================================
 
 async function loadDashboard() {
-  // A new dashboard load invalidates any unfinished city lookup.
   citySearchRequestId++;
 
   const requestId = ++dashboardRequestId;
   const place = { ...currentPlace };
 
   setStatus("Updating weather intelligence...");
+
   dashboard.classList.add("hidden");
 
   weatherData = null;
   airData = null;
 
-  // Load weather and air quality independently for the same location.
   const results = await Promise.allSettled([
     fetchWeather(place),
     fetchAirQuality(place)
   ]);
 
-  // Ignore responses belonging to an older location or refresh.
   if (requestId !== dashboardRequestId) return;
 
   if (results[0].status === "rejected") {
-    console.error(results[0].reason);
+    console.error("Weather error:", results[0].reason);
+
     setStatus(
       "Weather could not be loaded. Please try another city or refresh.",
       true
     );
+
     return;
   }
 
@@ -321,10 +340,11 @@ async function loadDashboard() {
     airData = results[1].value;
   } else {
     airData = null;
-    console.error(results[1].reason);
+    console.error("Air quality error:", results[1].reason);
   }
 
   renderDashboard();
+
   dashboard.classList.remove("hidden");
 
   if (airData) {
@@ -478,6 +498,7 @@ function renderAirQuality() {
         <strong style="color:${info.color}">${aqiValue}</strong>
         <span>US AQI</span>
       </div>
+
       <div class="aqi-description">
         <strong style="color:${info.color}">${info.label}</strong>
         <p>${info.advice}</p>
@@ -490,16 +511,19 @@ function renderAirQuality() {
         <strong>${displayValue(pm25)}</strong>
         <small>µg/m³</small>
       </div>
+
       <div class="pollutant">
         <span>PM10</span>
         <strong>${displayValue(pm10)}</strong>
         <small>µg/m³</small>
       </div>
+
       <div class="pollutant">
         <span>NO₂</span>
         <strong>${displayValue(no2)}</strong>
         <small>µg/m³</small>
       </div>
+
       <div class="pollutant">
         <span>O₃</span>
         <strong>${displayValue(ozone)}</strong>
@@ -522,7 +546,11 @@ function renderHourly() {
 
   container.innerHTML = "";
 
-  for (let i = start; i < Math.min(start + 12, hourly.time.length); i++) {
+  for (
+    let i = start;
+    i < Math.min(start + 12, hourly.time.length);
+    i++
+  ) {
     const [description, icon] = getWeatherInfo(
       hourly.weather_code[i],
       true
@@ -594,13 +622,20 @@ function renderTemperatureChart() {
         <stop offset="100%" stop-color="#a99aff" stop-opacity="0"/>
       </linearGradient>
     </defs>
+
     <path class="chart-area" d="${area}"></path>
     <path class="chart-line" d="${line}"></path>
-    ${points.filter((_, i) => i % 3 === 0 || i === points.length - 1).map(point =>
-      `<circle class="chart-point" cx="${point.x}" cy="${point.y}" r="4">
-        <title>${temperature(point.value)}</title>
-      </circle>`
-    ).join("")}
+
+    ${points
+      .filter((_, i) => i % 3 === 0 || i === points.length - 1)
+      .map(point => `
+        <circle class="chart-point"
+          cx="${point.x}"
+          cy="${point.y}"
+          r="4">
+          <title>${temperature(point.value)}</title>
+        </circle>
+      `).join("")}
   `;
 
   const labels = [0, 6, 12, 18, 23];
@@ -635,6 +670,7 @@ function renderDaily() {
       <span class="day-name">${formatDay(date, index)}</span>
       <span class="day-icon" title="${description}">${icon}</span>
       <span class="day-condition">${description}</span>
+
       <span class="day-temps">
         ${temperature(daily.temperature_2m_max[index])}
         <span>${temperature(daily.temperature_2m_min[index])}</span>
@@ -677,34 +713,49 @@ function renderDetails() {
 
 function updateWeatherEffects() {
   const effects = $("weather-effects");
+
   effects.innerHTML = "";
 
   if (!weatherData) return;
 
+  // Respect the visitor's reduced-motion preference.
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    return;
+  }
+
   const code = weatherData.current.weather_code;
 
-  // Rain effects
-  if ([51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82, 95, 96, 99].includes(code)) {
+  const rainCodes = [
+    51, 53, 55, 56, 57, 61, 63, 65,
+    66, 67, 80, 81, 82, 95, 96, 99
+  ];
+
+  const snowCodes = [71, 73, 75, 77, 85, 86];
+
+  if (rainCodes.includes(code)) {
     for (let i = 0; i < 45; i++) {
       const drop = document.createElement("span");
+
       drop.className = "raindrop";
       drop.style.left = `${Math.random() * 100}%`;
       drop.style.animationDuration = `${0.6 + Math.random() * 0.8}s`;
       drop.style.animationDelay = `${Math.random() * 2}s`;
+
       effects.appendChild(drop);
     }
   }
 
-  // Snow effects
-  if ([71, 73, 75, 77, 85, 86].includes(code)) {
+  if (snowCodes.includes(code)) {
     for (let i = 0; i < 35; i++) {
       const snow = document.createElement("span");
+
       snow.className = "snowflake";
       snow.textContent = "❄";
       snow.style.left = `${Math.random() * 100}%`;
       snow.style.animationDuration = `${5 + Math.random() * 8}s`;
       snow.style.animationDelay = `${Math.random() * 5}s`;
       snow.style.fontSize = `${8 + Math.random() * 10}px`;
+
       effects.appendChild(snow);
     }
   }
@@ -716,9 +767,11 @@ function updateWeatherEffects() {
 
 async function searchCity(city) {
   const query = city.trim();
+
   if (!query) return;
 
   const searchRequestId = ++citySearchRequestId;
+
   setStatus(`Searching for ${query}...`);
 
   try {
@@ -729,7 +782,10 @@ async function searchCity(city) {
       format: "json"
     });
 
-    const response = await fetch(`${GEO_API}?${params}`);
+    const response = await fetch(
+      `${GEO_API}?${params}`,
+      { signal: AbortSignal.timeout(15000) }
+    );
 
     if (!response.ok) {
       throw new Error("City search failed.");
@@ -737,7 +793,6 @@ async function searchCity(city) {
 
     const data = await response.json();
 
-    // A newer search or location selection has taken priority.
     if (searchRequestId !== citySearchRequestId) return;
 
     if (!data.results || data.results.length === 0) {
@@ -758,8 +813,12 @@ async function searchCity(city) {
   } catch (error) {
     if (searchRequestId !== citySearchRequestId) return;
 
-    console.error(error);
-    setStatus(error.message || "Could not search for that city.", true);
+    console.error("City search error:", error);
+
+    setStatus(
+      error.message || "Could not search for that city.",
+      true
+    );
   }
 }
 
@@ -769,7 +828,10 @@ async function searchCity(city) {
 
 function useMyLocation() {
   if (!navigator.geolocation) {
-    setStatus("Location services are not supported by this browser.", true);
+    setStatus(
+      "Location services are not supported by this browser.",
+      true
+    );
     return;
   }
 
@@ -786,15 +848,21 @@ function useMyLocation() {
 
       await loadDashboard();
     },
+
     (error) => {
       let message = "Unable to access your location.";
 
       if (error.code === error.PERMISSION_DENIED) {
-        message = "Location permission was denied. You can search for a city instead.";
+        message =
+          "Location permission was denied. You can search for a city instead.";
+      } else if (error.code === error.TIMEOUT) {
+        message =
+          "Location request timed out. Please try again.";
       }
 
       setStatus(message, true);
     },
+
     {
       enableHighAccuracy: false,
       timeout: 10000
@@ -860,6 +928,8 @@ function toggleFavorite() {
 function renderFavorites() {
   const container = $("favorites");
 
+  if (!container) return;
+
   if (!favorites.length) {
     container.innerHTML =
       '<span class="muted small">Save a city to see it here.</span>';
@@ -868,7 +938,7 @@ function renderFavorites() {
 
   container.innerHTML = "";
 
-  favorites.forEach((place, index) => {
+  favorites.forEach((place) => {
     const button = document.createElement("button");
 
     button.className = "favorite-chip";
@@ -902,22 +972,67 @@ function toggleUnit() {
 // EVENT LISTENERS
 // ============================================
 
-searchForm.addEventListener("submit", (event) => {
-  event.preventDefault();
-  searchCity(cityInput.value);
-});
+function startWeatherApp() {
+  // Check that the HTML and JavaScript belong together.
+  const requiredElements = {
+    "search-form": searchForm,
+    "city-input": cityInput,
+    "location-button": locationButton,
+    "refresh-button": refreshButton,
+    "unit-toggle": unitToggle,
+    "favorite-button": favoriteButton,
+    "status": statusBox,
+    "dashboard": dashboard,
+    "favorites": $("favorites"),
+    "weather-effects": $("weather-effects")
+  };
 
-locationButton.addEventListener("click", useMyLocation);
+  const missingElements = Object.entries(requiredElements)
+    .filter(([, element]) => !element)
+    .map(([id]) => `#${id}`);
 
-refreshButton.addEventListener("click", loadDashboard);
+  if (missingElements.length) {
+    const message =
+      `Weather app setup error. Missing HTML elements: ${missingElements.join(", ")}. Make sure index.html and app.js are from the same version.`;
 
-unitToggle.addEventListener("click", toggleUnit);
+    console.error(message);
 
-favoriteButton.addEventListener("click", toggleFavorite);
+    if (statusBox) {
+      statusBox.textContent = message;
+      statusBox.classList.add("error");
+    }
+
+    return;
+  }
+
+  // CORRECTED IDs:
+  // search-form instead of searchForm
+  // city-input instead of cityInput
+
+  searchForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    searchCity(cityInput.value);
+  });
+
+  locationButton.addEventListener("click", useMyLocation);
+  refreshButton.addEventListener("click", loadDashboard);
+  unitToggle.addEventListener("click", toggleUnit);
+  favoriteButton.addEventListener("click", toggleFavorite);
+
+  renderFavorites();
+  loadDashboard();
+}
 
 // ============================================
 // START THE APP
 // ============================================
 
-renderFavorites();
-loadDashboard();
+if (document.readyState === "loading") {
+  document.addEventListener(
+    "DOMContentLoaded",
+    startWeatherApp,
+    { once: true }
+  );
+} else {
+  startWeatherApp();
+}
