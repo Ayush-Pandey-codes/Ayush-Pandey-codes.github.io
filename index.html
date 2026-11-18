@@ -1,22 +1,116 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ayush Pandey | Portfolio</title>
-    <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; padding: 60px 20px; background-color: #f8f9fa; color: #333; }
-        .container { max-width: 600px; margin: 0 auto; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        h1 { color: #0056b3; margin-bottom: 10px; }
-        p { font-size: 1.1rem; color: #666; line-height: 1.6; }
-        .badge { background: #e1ecf4; color: #39739d; padding: 5px 12px; border-radius: 4px; font-size: 0.9rem; font-weight: bold; text-decoration: none; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Ayush's Lab - A playground for experiments, projects and ideas.">
+  <title>Ayush's Lab | Explore. Experiment. Build.</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Terve! Welcome to My Website 🇳🇵🇫🇮</h1>
-        <p>Hi, I am Ayush Pandey. I'm a student at Laurea UAS building my personal portfolio playground here.</p>
-        <p><span class="badge">ayushpandey01.com.np</span> is currently under development!</p>
+
+  <nav class="navbar">
+    <a href="#" class="logo">AYUSH<span>.</span></a>
+    <div class="nav-links">
+      <a href="#about">About</a>
+      <a href="#experiments">Experiments</a>
+      <a href="#projects">Projects</a>
+      <a href="#contact">Contact</a>
     </div>
+    <a href="#experiments" class="nav-button">Explore Lab ↗</a>
+  </nav>
+
+  <main>
+    <section class="hero">
+      <div class="status">
+        <span class="status-dot"></span>
+        WELCOME TO MY DIGITAL PLAYGROUND
+      </div>
+
+      <h1>
+        Terve! I'm <span class="gradient">Ayush Pandey.</span>
+        <br>Curiosity starts here.
+      </h1>
+
+      <p class="hero-text">
+        A student at Laurea UAS, originally from Nepal,
+        exploring technology, experimenting with code,
+        and turning random ideas into something real.
+      </p>
+
+      <div class="hero-actions">
+        <a href="#experiments" class="primary-button">Explore Experiments ↗</a>
+        <a href="#about" class="secondary-button">Get to know me</a>
+      </div>
+
+      <div class="location">
+        🇳🇵 Nepal roots &nbsp;·&nbsp; 🇫🇮 Finland journey
+      </div>
+    </section>
+
+    <section class="section" id="about">
+      <div class="section-label">01 / ABOUT ME</div>
+      <h2>Learning by <span class="gradient">building.</span></h2>
+      <p>
+        This is my corner of the internet. A place where I can
+        test ideas, learn new technologies, break things,
+        fix them, and share what I discover.
+      </p>
+    </section>
+
+    <section class="section" id="experiments">
+      <div class="section-label">02 / THE PLAYGROUND</div>
+      <h2>Things I'm <span class="gradient">experimenting with.</span></h2>
+
+      <div class="cards">
+        <article class="card">
+          <div class="card-icon">🎨</div>
+          <h3>Color Playground</h3>
+          <p>Explore colors and generate beautiful palettes.</p>
+          <a href="#" class="coming-soon">Coming soon ↗</a>
+        </article>
+
+        <article class="card">
+          <div class="card-icon">🧮</div>
+          <h3>Mini Calculator</h3>
+          <p>A simple interactive JavaScript experiment.</p>
+          <a href="#" class="coming-soon">Coming soon ↗</a>
+        </article>
+
+        <article class="card">
+          <div class="card-icon">✨</div>
+          <h3>Creative Lab</h3>
+          <p>Animations, visual ideas and random creations.</p>
+          <a href="#" class="coming-soon">Coming soon ↗</a>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="projects">
+      <div class="section-label">03 / PROJECTS</div>
+      <h2>Built with <span class="gradient">curiosity.</span></h2>
+      <p>Small steps, new skills, and projects along the way.</p>
+      <div class="project-placeholder">
+        🚀 More projects are on the way.
+      </div>
+    </section>
+
+    <section class="section contact" id="contact">
+      <div class="section-label">04 / SAY HELLO</div>
+      <h2>Have an idea? <span class="gradient">Let's connect.</span></h2>
+      <p>I'm always curious about interesting ideas and collaborations.</p>
+      <a href="mailto:ayushpandey1d@gmail.com" class="primary-button">
+        Send me an email ↗
+      </a>
+    </section>
+  </main>
+
+  <footer>
+    <a href="#" class="logo">AYUSH<span>.</span></a>
+    <p>Made with curiosity in Finland 🇫🇮 · © 2026 Ayush Pandey</p>
+  </footer>
+
+  <script src="script.js"></script>
 </body>
 </html>
