@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#091321">
+  <meta name="description" content="A personal weather dashboard with live conditions, forecasts, air quality and an interactive Earth explorer.">
+  <title>Weather Intelligence | Ayush Pandey</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.6.2/dist/maplibre-gl.css">
+  <link rel="stylesheet" href="./style.css?v=4">
+  <script defer src="https://unpkg.com/maplibre-gl@5.6.2/dist/maplibre-gl.js"></script>
+  <script defer src="./app.js?v=4"></script>
+</head>
+<body data-theme="night">
+  <div class="aurora aurora-a" aria-hidden="true"></div>
+  <div class="aurora aurora-b" aria-hidden="true"></div>
+  <div class="grain" aria-hidden="true"></div>
+
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="../../" aria-label="Weather Intelligence home">
+        <span class="brand-symbol"><span></span><span></span><span></span></span>
+        <span class="brand-copy">
+          <strong>WEATHER <i>INTELLIGENCE</i></strong>
+          <small>PERSONAL WEATHER SPACE</small>
+        </span>
+      </a>
+      <div class="topbar-actions">
+        <span class="live-status"><span class="live-dot"></span> LIVE FORECAST</span>
+        <button id="unit-toggle" class="unit-toggle" type="button" aria-label="Switch temperature units">°C</button>
+        <a class="portfolio-link" href="../../">Portfolio <span aria-hidden="true">↗</span></a>
+      </div>
+    </header>
+
+    <main>
+      <section class="intro-row">
+        <div>
+          <p class="eyebrow"><span class="eyebrow-line"></span> WEATHER, IN A NEW LIGHT</p>
+          <h1>Look up.<br><span>The world is changing.</span></h1>
+          <p class="intro-copy">A thoughtful view of the sky above you and the days ahead.</p>
+        </div>
+        <div class="intro-orbit" aria-hidden="true">
+          <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
+          <div class="orbit-core">✦</div>
+        </div>
+      </section>
+
+      <section class="search-area" aria-label="Find a location">
+        <form id="search-form" class="search-form">
+          <span class="search-glyph" aria-hidden="true">⌕</span>
+          <input id="city-input" type="search" placeholder="Search a city or place…" autocomplete="off" required>
+          <button class="search-submit" type="submit">Explore <span aria-hidden="true">→</span></button>
+        </form>
+        <button id="location-button" class="subtle-button" type="button"><span>◎</span> Use my location</button>
+        <button id="refresh-button" class="refresh-button" type="button" aria-label="Refresh weather" title="Refresh weather">↻</button>
+      </section>
+
+      <section class="saved-section">
+        <div class="saved-label">YOUR PLACES <span>·</span></div>
+        <div id="favorites" class="favorites-list"><span class="muted tiny">Save a place to keep it close.</span></div>
+      </section>
+      <p id="status" class="status-message" role="status" aria-live="polite">Preparing your forecast…</p>
+
+      <section id="dashboard" class="dashboard" hidden>
+        <section class="top-grid">
+          <article class="hero-card panel">
+            <div class="hero-sheen" aria-hidden="true"></div>
+            <div class="hero-heading">
+              <div>
+                <p class="eyebrow">RIGHT NOW <span class="live-dot"></span></p>
+                <h2 id="city-name">Helsinki</h2>
+                <p id="current-date" class="muted">—</p>
+              </div>
+              <button id="favorite-button" class="save-button" type="button" aria-label="Save this city" title="Save this city"><span>☆</span><b>Save place</b></button>
+            </div>
+            <div class="hero-current">
+              <div class="current-reading">
+                <div id="temperature" class="temperature">--°</div>
+                <p id="condition" class="condition">Loading conditions…</p>
+                <p id="feels-like" class="feels-like">Feels like --°</p>
+              </div>
+              <div class="weather-symbol" id="weather-icon" aria-hidden="true">☀️</div>
+            </div>
+            <div class="hero-divider"></div>
+            <div class="hero-stats">
+              <div class="hero-stat"><span class="stat-icon">◌</span><div><small>HUMIDITY</small><strong id="humidity">--%</strong></div></div>
+              <div class="hero-stat"><span class="stat-icon">↗</span><div><small>WIND</small><strong id="wind">-- km/h</strong></div></div>
+              <div class="hero-stat"><span class="stat-icon">⌁</span><div><small>PRECIPITATION</small><strong id="precipitation">-- mm</strong></div></div>
+            </div>
+          </article>
+
+          <div class="side-stack">
+            <article class="panel daylight-card">
+              <div class="card-heading"><div><p class="eyebrow">DAYLIGHT</p><h3>Sun cycle</h3></div><span class="heading-icon">☼</span></div>
+              <div class="sun-arc" aria-hidden="true"><span class="sun-arc-track"></span><span class="sun-arc-orb"></span></div>
+              <div class="sun-times">
+                <div><small> SUNRISE </small><strong id="sunrise">--:--</strong></div>
+                <div><small> SUNSET </small><strong id="sunset">--:--</strong></div>
+              </div>
+            </article>
+            <article class="panel uv-card">
+              <div class="card-heading"><div><p class="eyebrow">SUN EXPOSURE</p><h3>UV index</h3></div><span class="heading-icon">◉</span></div>
+              <div class="uv-reading"><strong id="uv-value">--</strong><span id="uv-label">Loading</span></div>
+              <div class="uv-track"><span id="uv-meter"></span></div>
+              <p id="uv-advice" class="muted small">UV forecast information.</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="panel hourly-panel">
+          <div class="section-heading">
+            <div><p class="eyebrow">THE HOURS AHEAD</p><h2>Hourly forecast</h2></div>
+            <span class="section-meta">Next 8 hours</span>
+          </div>
+          <div id="hourly-forecast" class="hourly-list"></div>
+        </section>
+
+        <section class="middle-grid">
+          <article class="panel chart-panel">
+            <div class="section-heading">
+              <div><p class="eyebrow">TEMPERATURE OUTLOOK</p><h2>Follow the curve</h2></div>
+              <span class="section-meta">Next 12 hours</span>
+            </div>
+            <div class="chart-wrap"><svg id="temperature-chart" viewBox="0 0 700 190" role="img" aria-label="Hourly temperature forecast"></svg></div>
+            <div id="chart-labels" class="chart-labels"></div>
+          </article>
+          <article class="panel air-panel">
+            <div class="section-heading">
+              <div><p class="eyebrow">BREATHE EASY</p><h2>Air quality</h2></div>
+              <span class="heading-icon">◌</span>
+            </div>
+            <div id="air-content" class="air-content"><span class="air-score">--</span><div><strong>Loading air quality</strong><p class="muted small">Checking the latest estimate…</p></div></div>
+            <div class="air-pollutants">
+              <div><small>PM2.5</small><strong id="pm25">-- μg/m³</strong></div>
+              <div><small>PM10</small><strong id="pm10">-- μg/m³</strong></div>
+            </div>
+            <p class="air-footnote">Forecast estimates · Open-Meteo / CAMS</p>
+          </article>
+        </section>
+
+        <section class="panel daily-panel">
+          <div class="section-heading">
+            <div><p class="eyebrow">A LITTLE FURTHER OUT</p><h2>7-day forecast</h2></div>
+            <span class="section-meta">Plan with confidence</span>
+          </div>
+          <div id="daily-forecast" class="daily-list"></div>
+        </section>
+
+        <section class="detail-grid">
+          <article class="panel detail-card"><span class="detail-symbol">🌡</span><small>FEELS LIKE</small><strong id="detail-feels">--°</strong><span class="detail-caption">Perceived temperature</span></article>
+          <article class="panel detail-card"><span class="detail-symbol">💧</span><small>HUMIDITY</small><strong id="detail-humidity">--%</strong><span class="detail-caption">Relative humidity</span></article>
+          <article class="panel detail-card"><span class="detail-symbol">🧭</span><small>WIND DIRECTION</small><strong id="detail-direction">--</strong><span class="detail-caption">Compass bearing</span></article>
+          <article class="panel detail-card"><span class="detail-symbol">🌧</span><small>PRECIPITATION</small><strong id="detail-rain">-- mm</strong><span class="detail-caption">Current amount</span></article>
+        </section>
+
+        <section class="panel earth-panel">
+          <div class="section-heading earth-heading">
+            <div><p class="eyebrow">A VIEW FROM ABOVE</p><h2>Earth explorer</h2><p class="muted small">A satellite perspective, centered on the place you’re exploring.</p></div>
+            <span class="earth-pill"><span class="live-dot"></span> INTERACTIVE GLOBE</span>
+          </div>
+          <div class="earth-layout">
+            <div class="earth-visual">
+              <div id="earth-globe" class="earth-globe"><div class="globe-fallback">Loading the planet…</div></div>
+              <div class="earth-caption">DRAG TO ROTATE <span>·</span> SCROLL TO ZOOM</div>
+            </div>
+            <aside class="earth-location">
+              <p class="eyebrow">SELECTED LOCATION</p>
+              <h3 id="earth-city">Helsinki</h3>
+              <p id="earth-country" class="muted">Finland</p>
+              <div class="coordinate"><small>LATITUDE</small><strong id="earth-lat">60.170°</strong></div>
+              <div class="coordinate"><small>LONGITUDE</small><strong id="earth-lon">24.938°</strong></div>
+              <p class="earth-note">The marker follows your selected weather location. Satellite detail and coverage vary by region.</p>
+              <button id="earth-focus" class="focus-button" type="button">Focus selected place <span>↗</span></button>
+            </aside>
+          </div>
+          <p class="map-credit">Satellite imagery © EOX · Map rendering by MapLibre</p>
+        </section>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span>Made with curiosity by <a href="../../">Ayush Pandey</a></span>
+      <span>Weather data by <a href="https://open-meteo.com/" target="_blank" rel="noreferrer">Open-Meteo</a></span>
+    </footer>
+  </div>
+</body>
+</html>
