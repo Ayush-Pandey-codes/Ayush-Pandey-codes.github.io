@@ -277,16 +277,25 @@ function updateDisplay() {
   display.textContent = expression || "0";
 }
 
+
 function calculate() {
   if (!expression) return;
 
   try {
-    if (!/^[0-9+\-*/%.() ]+$/.test(expression)) {
+    let safeExpression = expression;
+
+    // Convert percentage into a decimal
+    safeExpression = safeExpression.replace(
+      /(\d+(?:\.\d+)?)%/g,
+      "($1/100)"
+    );
+
+    if (!/^[0-9+\-*/.() ]+$/.test(safeExpression)) {
       throw new Error("Invalid expression");
     }
 
     const result = Function(
-      '"use strict"; return (' + expression + ')'
+      '"use strict"; return (' + safeExpression + ')'
     )();
 
     if (!Number.isFinite(result)) {
@@ -298,10 +307,12 @@ function calculate() {
     );
 
     previous.textContent = expression + " =";
+
     history.unshift(expression + " = " + formatted);
     history = history.slice(0, 10);
 
     renderHistory();
+
     expression = formatted;
     updateDisplay();
 
