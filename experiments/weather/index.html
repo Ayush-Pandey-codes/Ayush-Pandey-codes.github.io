@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,6 +13,7 @@
 
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.6.2/dist/maplibre-gl.css">
   <link rel="stylesheet" href="./style.css">
 </head>
 
@@ -291,14 +293,12 @@
             <h2>Earth Explorer</h2>
 
             <p class="muted small">
-              Explore the globe and follow your selected weather location.
+              Rotate the planet, zoom into satellite imagery, and follow your selected city.
             </p>
 
           </div>
 
-          <span id="earth-mode" class="earth-mode">
-            🌍 WAITING FOR WEATHER
-          </span>
+          <span id="earth-mode" class="earth-mode">🌍 INTERACTIVE SATELLITE GLOBE</span>
 
         </div>
 
@@ -316,7 +316,7 @@
             </div>
 
             <p class="earth-controls-hint">
-              Drag to rotate · Scroll to zoom
+              Drag to rotate · Scroll or pinch to zoom
             </p>
 
           </div>
@@ -358,8 +358,7 @@
 
 
             <p class="earth-hint">
-              The marker follows the city selected in your weather search.
-              Rotate and zoom the Earth to explore the planet.
+              The marker follows your selected weather city. Zoom in to explore satellite imagery; imagery detail and availability vary by region.
             </p>
 
           </div>
@@ -586,8 +585,8 @@
   </div>
 
 
-  <!-- 3D EARTH LIBRARY -->
-  <script src="https://unpkg.com/globe.gl"></script>
+  <!-- Interactive globe and satellite map -->
+  <script src="https://unpkg.com/maplibre-gl@5.6.2/dist/maplibre-gl.js"></script>
 
   <!-- WEATHER APPLICATION -->
   <script src="./app.js"></script>
