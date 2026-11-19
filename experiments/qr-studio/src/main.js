@@ -830,4 +830,9 @@ updateSizeLabel();
 renderFields();
 renderHistory();
 
-console.log("QR Studio initialized successfully!");
+console.log("QR Studio initialized successfully!");  
+console.log("QRCode library:", typeof QRCode); 
+console.log("QR type element:", qrType); 
+console.log("Dynamic fields element:", dynamicFields); 
+console.log("Selected type:", qrType.value); 
+console.log("Field templates:", Object.keys(fieldTemplates));  renderFields();
