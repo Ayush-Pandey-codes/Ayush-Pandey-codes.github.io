@@ -361,7 +361,7 @@ async function updateQR() {
     $("downloadPng").disabled = false;
     $("downloadSvg").disabled = false;
 
-    saveHistory(data);
+    if (qrType.value !== "wifi") {   saveHistory(data); }
 
   } catch (error) {
     if (version !== generationVersion) return;
