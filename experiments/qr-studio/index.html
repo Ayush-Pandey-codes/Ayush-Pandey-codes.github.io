@@ -1,1 +1,207 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0b0b10">
+  <meta name="description" content="QR Studio — Create beautiful, custom QR codes for free.">
+  <title>QR Studio — Create Your QR</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+  <div class="background-glow"></div>
+
+  <header class="navbar">
+    <a href="#" class="brand">
+      <span class="brand-icon">▦</span>
+      <span>QR<span class="brand-accent">Studio</span></span>
+    </a>
+
+    <div class="nav-right">
+      <span class="free-label"><span></span> FREE FOREVER</span>
+      <a href="#history" class="history-link">My History ↗</a>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <section class="hero">
+      <div class="eyebrow"><span></span> YOUR QR. YOUR STYLE.</div>
+      <h1>Create QR codes<br>that <span>stand out.</span></h1>
+      <p>Generate, customize and download beautiful QR codes.<br>Simple, powerful and completely free.</p>
+    </section>
+
+    <section class="workspace">
+
+      <div class="editor-panel">
+
+        <div class="panel-heading">
+          <div>
+            <span class="section-number">01 / CONFIGURATION</span>
+            <h2>Create your QR</h2>
+          </div>
+          <span class="live-tag"><span></span> LIVE EDITOR</span>
+        </div>
+
+        <label class="field-label" for="qrType">QR CODE TYPE</label>
+        <select id="qrType" class="select-control">
+          <option value="url">↗ Website URL</option>
+          <option value="text">✎ Plain Text</option>
+          <option value="email">✉ Email</option>
+          <option value="phone">☎ Phone Number</option>
+          <option value="sms">▤ SMS Message</option>
+          <option value="wifi">⌁ Wi-Fi Network</option>
+        </select>
+
+        <div id="dynamicFields"></div>
+
+        <div class="section-divider"></div>
+
+        <div class="subheading">
+          <div>
+            <span class="section-number">02 / APPEARANCE</span>
+            <h3>Make it yours</h3>
+          </div>
+        </div>
+
+        <div class="color-grid">
+          <div>
+            <label class="field-label" for="foreground">FOREGROUND</label>
+            <div class="color-control">
+              <input type="color" id="foreground" value="#111111">
+              <span id="foregroundValue">#111111</span>
+            </div>
+          </div>
+          <div>
+            <label class="field-label" for="background">BACKGROUND</label>
+            <div class="color-control">
+              <input type="color" id="background" value="#ffffff">
+              <span id="backgroundValue">#FFFFFF</span>
+            </div>
+          </div>
+        </div>
+
+        <label class="field-label" for="qrSize">QR CODE SIZE <span id="sizeValue">320 px</span></label>
+        <input type="range" id="qrSize" min="180" max="600" step="20" value="320">
+
+        <label class="field-label" for="errorLevel">ERROR CORRECTION</label>
+        <select id="errorLevel" class="select-control">
+          <option value="M">Medium (15%)</option>
+          <option value="Q">Quartile (25%)</option>
+          <option value="H" selected>High (30%) — Best for logos</option>
+          <option value="L">Low (7%)</option>
+        </select>
+
+        <div class="section-divider"></div>
+
+        <div class="subheading">
+          <div>
+            <span class="section-number">03 / PERSONALIZATION</span>
+            <h3>Add your logo</h3>
+          </div>
+          <span class="optional">OPTIONAL</span>
+        </div>
+
+        <label class="upload-area" for="logoInput">
+          <span class="upload-icon">＋</span>
+          <span id="logoLabel">Upload your logo</span>
+          <small>PNG, JPG, WEBP · Max 2 MB</small>
+          <input type="file" id="logoInput" accept="image/png,image/jpeg,image/webp">
+        </label>
+
+        <button id="removeLogo" class="remove-logo hidden" type="button">Remove logo</button>
+
+        <button id="resetButton" class="reset-button" type="button">↺ Reset customization</button>
+
+      </div>
+
+      <aside class="preview-panel">
+
+        <div class="panel-heading">
+          <div>
+            <span class="section-number">04 / YOUR CREATION</span>
+            <h2>Live preview</h2>
+          </div>
+          <span class="ready-tag">● READY</span>
+        </div>
+
+        <div class="preview-stage">
+          <div class="qr-frame">
+            <canvas id="qrCanvas"></canvas>
+            <div id="emptyState" class="empty-state">
+              <span>▦</span>
+              <p>Your QR code will<br>appear here</p>
+            </div>
+          </div>
+        </div>
+
+        <div id="statusMessage" class="status-message">Enter content to generate your QR code.</div>
+
+        <div class="preview-info">
+          <div>
+            <span>FORMAT</span>
+            <strong>QR CODE</strong>
+          </div>
+          <div>
+            <span>SIZE</span>
+            <strong id="previewSize">320 × 320</strong>
+          </div>
+          <div>
+            <span>ERROR LEVEL</span>
+            <strong id="previewError">HIGH</strong>
+          </div>
+        </div>
+
+        <div class="download-buttons">
+          <button id="downloadPng" class="primary-button" type="button">
+            ↓ Download PNG
+          </button>
+          <button id="downloadSvg" class="secondary-button" type="button">
+            ↓ SVG
+          </button>
+        </div>
+
+        <button id="copyContent" class="copy-button" type="button">▣ Copy QR content</button>
+
+        <p class="privacy-note">⌑ Your data stays in your browser. No account required.</p>
+
+      </aside>
+
+    </section>
+
+    <section class="history-section" id="history">
+      <div class="history-heading">
+        <div>
+          <span class="section-number">05 / YOUR COLLECTION</span>
+          <h2>Recent creations</h2>
+        </div>
+        <button id="clearHistory" class="clear-button" type="button">Clear history</button>
+      </div>
+
+      <div id="historyList" class="history-list">
+        <div class="history-empty">Your saved QR codes will appear here.</div>
+      </div>
+    </section>
+
+    <footer>
+      <a href="#" class="brand footer-brand">
+        <span class="brand-icon">▦</span>
+        QR<span class="brand-accent">Studio</span>
+      </a>
+      <p>Made with curiosity. Built for everyone.</p>
+      <span>© 2026 QR Studio</span>
+    </footer>
+
+  </main>
+
+  <div id="toast" class="toast"></div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
+
