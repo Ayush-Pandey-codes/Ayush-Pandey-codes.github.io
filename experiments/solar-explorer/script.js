@@ -3,6 +3,7 @@ const planets = [
   {
     name: "Mercury",
     className: "mercury",
+    image: "./images/mercury.jpg",
     type: "Terrestrial",
     tagline: "The smallest planet",
     description: "Mercury is the smallest planet in our Solar System and the closest to the Sun. Its surface is covered with craters, much like our Moon.",
@@ -14,6 +15,7 @@ const planets = [
   {
     name: "Venus",
     className: "venus",
+    image: "./images/venus.jpg",
     type: "Terrestrial",
     tagline: "Our hottest neighbor",
     description: "Venus is wrapped in thick clouds that trap heat. Although Mercury is closer to the Sun, Venus is the hottest planet in our Solar System.",
@@ -25,6 +27,7 @@ const planets = [
   {
     name: "Earth",
     className: "earth",
+    image: "./images/earth.jpg",
     type: "Terrestrial",
     tagline: "Our home planet",
     description: "Earth is the only world we currently know to support life. Its liquid water, protective atmosphere, and comfortable distance from the Sun make it special.",
@@ -36,6 +39,7 @@ const planets = [
   {
     name: "Mars",
     className: "mars",
+    image: "./images/mars.jpg",
     type: "Terrestrial",
     tagline: "The Red Planet",
     description: "Mars gets its rusty red color from iron-rich dust. It has enormous volcanoes, deep canyons, polar ice caps, and signs of ancient flowing water.",
@@ -47,6 +51,7 @@ const planets = [
   {
     name: "Jupiter",
     className: "jupiter",
+    image: "./images/jupiter.jpg",
     type: "Gas giant",
     tagline: "The giant of our system",
     description: "Jupiter is the largest planet in the Solar System. It is a gas giant with powerful storms, colorful cloud bands, and a famous Great Red Spot.",
@@ -58,6 +63,7 @@ const planets = [
   {
     name: "Saturn",
     className: "saturn",
+    image: "./images/saturn.jpg",
     type: "Gas giant",
     tagline: "The ringed wonder",
     description: "Saturn is famous for its spectacular rings, made mostly of pieces of ice and rock. It is a gas giant with a large family of moons.",
@@ -69,6 +75,7 @@ const planets = [
   {
     name: "Uranus",
     className: "uranus",
+    image: "./images/uranus.jpg",
     type: "Ice giant",
     tagline: "The sideways planet",
     description: "Uranus is an ice giant with a blue-green color caused by methane in its atmosphere. It rotates on its side, giving it very unusual seasons.",
@@ -80,6 +87,7 @@ const planets = [
   {
     name: "Neptune",
     className: "neptune",
+    image: "./images/neptune.jpg",
     type: "Ice giant",
     tagline: "The distant blue world",
     description: "Neptune is the most distant recognized planet from the Sun. It is a cold, dark world with powerful winds and a deep blue appearance.",
@@ -123,9 +131,16 @@ function renderPlanetCards() {
       aria-label="Explore ${planet.name}"
     >
       <span class="planet-number">PLANET 0${index + 1}</span>
+
       <span class="planet-art">
-        <span class="planet-ball ${planet.className}"></span>
+        <img
+          class="planet-photo"
+          src="${planet.image}"
+          alt="${planet.name}"
+          loading="lazy"
+        >
       </span>
+
       <h3>${planet.name}</h3>
       <p>${planet.tagline}</p>
     </button>
@@ -139,12 +154,17 @@ function selectPlanet(index) {
 
   document.querySelectorAll(".planet-card").forEach((card) => {
     const isActive = Number(card.dataset.planet) === index;
+
     card.classList.toggle("active", isActive);
     card.setAttribute("aria-pressed", String(isActive));
   });
 
   detailVisual.innerHTML = `
-    <span class="detail-planet ${planet.className}" aria-hidden="true"></span>
+    <img
+      class="detail-photo"
+      src="${planet.image}"
+      alt="${planet.name}"
+    >
   `;
 
   detailName.textContent = planet.name;
