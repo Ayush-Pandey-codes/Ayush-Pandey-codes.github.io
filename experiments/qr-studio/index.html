@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,10 +6,13 @@
   <meta name="theme-color" content="#0b0b10">
   <meta name="description" content="QR Studio — Create beautiful, custom QR codes for free.">
   <title>QR Studio — Create Your QR</title>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
   <link rel="stylesheet" href="./style.css">
+
 </head>
 <body>
 
@@ -45,7 +47,7 @@
             <span class="section-number">01 / CONFIGURATION</span>
             <h2>Create your QR</h2>
           </div>
-          <span class="live-tag"><span></span> LIVE EDITOR</span>
+          <span class="live-tag"><span></span> QR GENERATOR</span>
         </div>
 
         <label class="field-label" for="qrType">QR CODE TYPE</label>
@@ -59,9 +61,11 @@
         </select>
 
         <div id="dynamicFields"></div>
-<button id="generateQR" class="primary-button" type="button">
-  Generate QR Code
-</button>
+
+        <button id="generateQR" class="primary-button" type="button" style="width:100%;margin-top:16px;">
+          Generate QR Code
+        </button>
+
         <div class="section-divider"></div>
 
         <div class="subheading">
@@ -79,6 +83,7 @@
               <span id="foregroundValue">#111111</span>
             </div>
           </div>
+
           <div>
             <label class="field-label" for="background">BACKGROUND</label>
             <div class="color-control">
@@ -88,7 +93,9 @@
           </div>
         </div>
 
-        <label class="field-label" for="qrSize">QR CODE SIZE <span id="sizeValue">320 px</span></label>
+        <label class="field-label" for="qrSize">
+          QR CODE SIZE <span id="sizeValue">320 px</span>
+        </label>
         <input type="range" id="qrSize" min="180" max="600" step="20" value="320">
 
         <label class="field-label" for="errorLevel">ERROR CORRECTION</label>
@@ -116,9 +123,13 @@
           <input type="file" id="logoInput" accept="image/png,image/jpeg,image/webp">
         </label>
 
-        <button id="removeLogo" class="remove-logo hidden" type="button">Remove logo</button>
+        <button id="removeLogo" class="remove-logo hidden" type="button">
+          Remove logo
+        </button>
 
-        <button id="resetButton" class="reset-button" type="button">↺ Reset customization</button>
+        <button id="resetButton" class="reset-button" type="button">
+          ↺ Reset customization
+        </button>
 
       </div>
 
@@ -127,7 +138,7 @@
         <div class="panel-heading">
           <div>
             <span class="section-number">04 / YOUR CREATION</span>
-            <h2>Live preview</h2>
+            <h2>QR preview</h2>
           </div>
           <span class="ready-tag">● READY</span>
         </div>
@@ -142,7 +153,9 @@
           </div>
         </div>
 
-        <div id="statusMessage" class="status-message">Enter content to generate your QR code.</div>
+        <div id="statusMessage" class="status-message">
+          Enter content and press Generate QR Code.
+        </div>
 
         <div class="preview-info">
           <div>
@@ -160,17 +173,21 @@
         </div>
 
         <div class="download-buttons">
-          <button id="downloadPng" class="primary-button" type="button">
+          <button id="downloadPng" class="primary-button" type="button" disabled>
             ↓ Download PNG
           </button>
-          <button id="downloadSvg" class="secondary-button" type="button">
+          <button id="downloadSvg" class="secondary-button" type="button" disabled>
             ↓ SVG
           </button>
         </div>
 
-        <button id="copyContent" class="copy-button" type="button">▣ Copy QR content</button>
+        <button id="copyContent" class="copy-button" type="button" disabled>
+          ▣ Copy QR content
+        </button>
 
-        <p class="privacy-note">⌑ Your data stays in your browser. No account required.</p>
+        <p class="privacy-note">
+          ⌑ Your data stays in your browser. No account required.
+        </p>
 
       </aside>
 
@@ -182,7 +199,9 @@
           <span class="section-number">05 / YOUR COLLECTION</span>
           <h2>Recent creations</h2>
         </div>
-        <button id="clearHistory" class="clear-button" type="button">Clear history</button>
+        <button id="clearHistory" class="clear-button" type="button">
+          Clear history
+        </button>
       </div>
 
       <div id="historyList" class="history-list">
@@ -203,8 +222,9 @@
 
   <div id="toast" class="toast"></div>
 
- <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
-<script src="./src/main.js"></script>
+  <!-- QRCode browser library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.1/qrcode.min.js"></script>
+  <script src="./src/main.js"></script>
+
 </body>
 </html>
-
