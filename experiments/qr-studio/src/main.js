@@ -22,11 +22,12 @@ const toast = $("toast");
 let logoData = null;
 let generatedPayload = "";
 let generated = false;
-let generationVersion = 0;
 let toastTimer = null;
 
+const HISTORY_KEY = "qr-studio-history";
+
 // ==========================================
-// DYNAMIC INPUT FIELDS
+// INPUT FIELDS
 // ==========================================
 
 const fieldTemplates = {
@@ -34,7 +35,7 @@ const fieldTemplates = {
     <label class="field-label" for="content">WEBSITE URL</label>
     <input class="text-control" id="content"
       placeholder="https://example.com"
-      type="url" autocomplete="url">
+      type="url">
   `,
 
   text: `
@@ -46,7 +47,8 @@ const fieldTemplates = {
   phone: `
     <label class="field-label" for="content">PHONE NUMBER</label>
     <input class="text-control" id="content"
-      placeholder="+358 40 123 4567" type="tel">
+      placeholder="+358 40 123 4567"
+      type="tel">
   `,
 
   email: `
@@ -98,8 +100,16 @@ const fieldTemplates = {
 
 function renderFields() {
   dynamicFields.innerHTML = fieldTemplates[qrType.value];
-  updateQR();
+  generated = false;
+  generatedPayload = "";
+  qrCanvas.style.display = "none";
+  emptyState.style.display = "flex";
+  statusMessage.textContent = "Enter content and press Generate QR Code.";
 }
+
+// ==========================================
+// READ INPUT
+// ==========================================
 
 function readFields() {
   const type = qrType.value;
@@ -173,10 +183,8 @@ function readFields() {
 
       if (!number) return null;
 
-      const payload = "SMSTO:" + number + ":" + message;
-
       return {
-        payload,
+        payload: "SMSTO:" + number + ":" + message,
         label: number,
         fields: {
           smsNumber: number,
@@ -225,7 +233,7 @@ function readFields() {
 }
 
 // ==========================================
-// TOAST NOTIFICATIONS
+// TOAST
 // ==========================================
 
 function showToast(message) {
@@ -252,7 +260,6 @@ function drawRoundedRect(ctx, x, y, width, height, radius) {
 function loadImage(source) {
   return new Promise((resolve, reject) => {
     const image = new Image();
-
     image.onload = () => resolve(image);
     image.onerror = reject;
     image.src = source;
@@ -306,7 +313,6 @@ async function drawLogo(canvas, source, size) {
 }
 
 async function updateQR() {
-  const version = ++generationVersion;
   const data = readFields();
 
   if (!data) {
@@ -319,8 +325,17 @@ async function updateQR() {
     statusMessage.textContent =
       qrType.value === "wifi" && $("wifiName")?.value.trim()
         ? "Enter a password or choose an open network."
-        : "Enter content to generate your QR code.";
+        : "Please enter content first.";
 
+    return;
+  }
+
+  if (typeof QRCode === "undefined") {
+    generated = false;
+    statusMessage.textContent =
+      "QR library failed to load. Please refresh the page.";
+
+    console.error("QRCode library is missing.");
     return;
   }
 
@@ -342,8 +357,6 @@ async function updateQR() {
       await drawLogo(qrCanvas, logoData, size);
     }
 
-    if (version !== generationVersion) return;
-
     generated = true;
     generatedPayload = data.payload;
 
@@ -357,13 +370,15 @@ async function updateQR() {
 
     $("downloadPng").disabled = false;
     $("downloadSvg").disabled = false;
+    $("copyContent").disabled = false;
 
-    if (qrType.value !== "wifi") {   saveHistory(data); }
+    if (qrType.value !== "wifi") {
+      saveHistory(data);
+    }
 
   } catch (error) {
-    if (version !== generationVersion) return;
-
     generated = false;
+
     qrCanvas.style.display = "none";
     emptyState.style.display = "flex";
 
@@ -372,16 +387,15 @@ async function updateQR() {
 
     $("downloadPng").disabled = true;
     $("downloadSvg").disabled = true;
+    $("copyContent").disabled = true;
 
     console.error("QR generation error:", error);
   }
 }
 
 // ==========================================
-// QR HISTORY
+// HISTORY
 // ==========================================
-
-const HISTORY_KEY = "qr-studio-history";
 
 function getHistory() {
   try {
@@ -410,24 +424,30 @@ function saveHistory(data) {
 
   let history = getHistory();
 
-  // Avoid duplicate entries for the same QR type and content.
   history = history.filter(
-    item =>
-      !(item.type === entry.type &&
-        item.payload === entry.payload)
+    item => !(item.type === entry.type &&
+      item.payload === entry.payload)
   );
 
   history.unshift(entry);
-
-  // Keep only the latest 12 creations.
   history = history.slice(0, 12);
 
   try {
     localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
     renderHistory();
   } catch {
-    showToast("Browser storage is full. Clear some history.");
+    showToast("Browser storage is full.");
   }
+}
+
+function escapeHTML(value) {
+  return String(value).replace(/[&<>"']/g, char => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;"
+  })[char]);
 }
 
 async function renderHistory() {
@@ -445,15 +465,13 @@ async function renderHistory() {
       <h4>${escapeHTML(item.label)}</h4>
       <p>${escapeHTML(item.type.toUpperCase())}</p>
       <div class="history-actions">
-        <button data-action="load" data-id="${item.id}">
-          Load
-        </button>
-        <button data-action="download" data-id="${item.id}">
-          PNG ↓
-        </button>
+        <button data-action="load" data-id="${item.id}">Load</button>
+        <button data-action="download" data-id="${item.id}">PNG ↓</button>
       </div>
     </article>
   `).join("");
+
+  if (typeof QRCode === "undefined") return;
 
   for (const item of history) {
     const canvas = $(`history-${item.id}`);
@@ -474,20 +492,6 @@ async function renderHistory() {
     }
   }
 }
-
-function escapeHTML(value) {
-  return String(value).replace(/[&<>"']/g, char => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#039;"
-  })[char]);
-}
-
-// ==========================================
-// LOAD HISTORY ENTRY
-// ==========================================
 
 function loadHistoryEntry(item) {
   qrType.value = item.type;
@@ -512,7 +516,6 @@ function loadHistoryEntry(item) {
   updateColorLabels();
   updateSizeLabel();
 
-  // Logo uploads are deliberately not persisted.
   logoData = null;
   logoInput.value = "";
   logoLabel.textContent = "Upload your logo";
@@ -529,7 +532,7 @@ function loadHistoryEntry(item) {
 }
 
 // ==========================================
-// DOWNLOAD PNG
+// DOWNLOADS
 // ==========================================
 
 function downloadPNG() {
@@ -546,10 +549,6 @@ function downloadPNG() {
   showToast("PNG downloaded!");
 }
 
-// ==========================================
-// DOWNLOAD SVG
-// ==========================================
-
 async function downloadSVG() {
   if (!generated) {
     showToast("Generate a QR code first.");
@@ -557,48 +556,16 @@ async function downloadSVG() {
   }
 
   try {
-    const size = Number(qrSize.value);
-    const correction = logoData ? "H" : errorLevel.value;
-
-    let svg = await QRCode.toString(generatedPayload, {
+    const svg = await QRCode.toString(generatedPayload, {
       type: "svg",
-      width: size,
+      width: Number(qrSize.value),
       margin: 2,
-      errorCorrectionLevel: correction,
+      errorCorrectionLevel: logoData ? "H" : errorLevel.value,
       color: {
         dark: foreground.value,
         light: background.value
       }
     });
-
-    if (logoData) {
-      const totalSize = size * 0.26;
-      const logoSize = size * 0.19;
-      const x = (size - logoSize) / 2;
-      const y = (size - logoSize) / 2;
-      const padding = (totalSize - logoSize) / 2;
-
-      const logo = `
-        <rect
-          x="${x - padding}"
-          y="${y - padding}"
-          width="${totalSize}"
-          height="${totalSize}"
-          rx="${size * 0.035}"
-          fill="#ffffff"
-        />
-        <image
-          href="${logoData}"
-          x="${x}"
-          y="${y}"
-          width="${logoSize}"
-          height="${logoSize}"
-          preserveAspectRatio="xMidYMid meet"
-        />
-      `;
-
-      svg = svg.replace("</svg>", `${logo}</svg>`);
-    }
 
     const blob = new Blob([svg], {
       type: "image/svg+xml;charset=utf-8"
@@ -621,10 +588,6 @@ async function downloadSVG() {
   }
 }
 
-// ==========================================
-// COPY CONTENT
-// ==========================================
-
 async function copyContent() {
   if (!generated) {
     showToast("Generate a QR code first.");
@@ -635,12 +598,12 @@ async function copyContent() {
     await navigator.clipboard.writeText(generatedPayload);
     showToast("QR content copied!");
   } catch {
-    showToast("Clipboard unavailable. Please copy manually.");
+    showToast("Clipboard unavailable.");
   }
 }
 
 // ==========================================
-// COLOR AND SIZE LABELS
+// COLOR AND SIZE
 // ==========================================
 
 function updateColorLabels() {
@@ -661,7 +624,6 @@ function updateSizeLabel() {
 
 logoInput.addEventListener("change", event => {
   const file = event.target.files[0];
-
   if (!file) return;
 
   const allowedTypes = [
@@ -689,8 +651,7 @@ logoInput.addEventListener("change", event => {
     logoLabel.textContent = file.name;
     removeLogo.classList.remove("hidden");
     errorLevel.value = "H";
-    updateQR();
-    showToast("Logo uploaded!");
+    showToast("Logo uploaded! Press Generate QR Code.");
   };
 
   reader.onerror = () => {
@@ -705,8 +666,7 @@ removeLogo.addEventListener("click", () => {
   logoInput.value = "";
   logoLabel.textContent = "Upload your logo";
   removeLogo.classList.add("hidden");
-  updateQR();
-  showToast("Logo removed.");
+  showToast("Logo removed. Generate QR again.");
 });
 
 // ==========================================
@@ -726,9 +686,8 @@ $("resetButton").addEventListener("click", () => {
 
   updateColorLabels();
   updateSizeLabel();
-  updateQR();
 
-  showToast("Customization reset.");
+  showToast("Customization reset. Generate QR again.");
 });
 
 // ==========================================
@@ -737,25 +696,35 @@ $("resetButton").addEventListener("click", () => {
 
 qrType.addEventListener("change", renderFields);
 
-dynamicFields.addEventListener("input", updateQR);
-dynamicFields.addEventListener("change", updateQR);
+dynamicFields.addEventListener("input", () => {
+  generated = false;
+  statusMessage.textContent = "Press Generate QR Code to create your QR.";
+});
+
+dynamicFields.addEventListener("change", () => {
+  generated = false;
+});
+
+$("generateQR").addEventListener("click", updateQR);
 
 foreground.addEventListener("input", () => {
   updateColorLabels();
-  updateQR();
+  generated = false;
 });
 
 background.addEventListener("input", () => {
   updateColorLabels();
-  updateQR();
+  generated = false;
 });
 
 qrSize.addEventListener("input", () => {
   updateSizeLabel();
-  updateQR();
+  generated = false;
 });
 
-errorLevel.addEventListener("change", updateQR);
+errorLevel.addEventListener("change", () => {
+  generated = false;
+});
 
 $("downloadPng").addEventListener("click", downloadPNG);
 $("downloadSvg").addEventListener("click", downloadSVG);
@@ -767,12 +736,10 @@ $("copyContent").addEventListener("click", copyContent);
 
 historyList.addEventListener("click", event => {
   const button = event.target.closest("button[data-action]");
-
   if (!button) return;
 
   const id = Number(button.dataset.id);
   const item = getHistory().find(entry => entry.id === id);
-
   if (!item) return;
 
   if (button.dataset.action === "load") {
@@ -824,15 +791,12 @@ $("clearHistory").addEventListener("click", () => {
 
 $("downloadPng").disabled = true;
 $("downloadSvg").disabled = true;
+$("copyContent").disabled = true;
 
 updateColorLabels();
 updateSizeLabel();
 renderFields();
 renderHistory();
 
-console.log("QR Studio initialized successfully!");  
-console.log("QRCode library:", typeof QRCode); 
-console.log("QR type element:", qrType); 
-console.log("Dynamic fields element:", dynamicFields); 
-console.log("Selected type:", qrType.value); 
-console.log("Field templates:", Object.keys(fieldTemplates));  renderFields();
+console.log("QR Studio initialized.");
+console.log("QRCode library:", typeof QRCode);
