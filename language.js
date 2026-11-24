@@ -57,61 +57,60 @@ const toolTranslations = {
   ]
 };
 
-const originalContent = new Map();
-const originalTools = [];
+// Save the original English text.
+const originalElements = new Map();
+const originalCards = [];
 
 function saveOriginalContent() {
   document.querySelectorAll("[data-i18n]").forEach(element => {
-    originalContent.set(element, element.innerHTML);
+    originalElements.set(element, element.innerHTML);
   });
 
-  document.querySelectorAll(".lab-card").forEach(card => {
-    const title = card.querySelector("h3");
-    const description = card.querySelector("p");
-
-    originalTools.push({
-      title: title ? title.innerHTML : null,
-      description: description ? description.innerHTML : null
+  document.querySelectorAll(".tool-card").forEach(card => {
+    originalCards.push({
+      title: card.querySelector("h3")?.innerHTML ?? null,
+      description: card.querySelector("p")?.innerHTML ?? null
     });
   });
 }
 
+// Change language.
 function applyLanguage(language) {
-  const selectedLanguage = language;
+  const currentLanguage = ["en", "fi", "ne"].includes(language)
+    ? language
+    : "en";
 
-  // Set the correct HTML language.
-  document.documentElement.lang =
-    selectedLanguage === "gb" ? "en" : selectedLanguage;
+  document.documentElement.lang = currentLanguage;
 
-  // Restore original English content.
-  if (selectedLanguage === "gb") {
-    originalContent.forEach((originalHTML, element) => {
-      element.innerHTML = originalHTML;
-    });
+  // Always restore English first.
+  originalElements.forEach((originalHTML, element) => {
+    element.innerHTML = originalHTML;
+  });
 
-    document.querySelectorAll(".lab-card").forEach((card, index) => {
-      const title = card.querySelector("h3");
-      const description = card.querySelector("p");
-      const original = originalTools[index];
+  document.querySelectorAll(".tool-card").forEach((card, index) => {
+    const original = originalCards[index];
 
-      if (!original) return;
+    if (!original) return;
 
-      if (title && original.title !== null) {
-        title.innerHTML = original.title;
-      }
+    const title = card.querySelector("h3");
+    const description = card.querySelector("p");
 
-      if (description && original.description !== null) {
-        description.innerHTML = original.description;
-      }
-    });
+    if (title && original.title !== null) {
+      title.innerHTML = original.title;
+    }
 
+    if (description && original.description !== null) {
+      description.innerHTML = original.description;
+    }
+  });
+
+  // English is restored, so no further translation is needed.
+  if (currentLanguage === "en") {
     return;
   }
 
-  // Apply Finnish or Nepali translations.
-  const dictionary = translations[selectedLanguage];
-
-  if (!dictionary) return;
+  // Apply Finnish or Nepali.
+  const dictionary = translations[currentLanguage];
 
   document.querySelectorAll("[data-i18n]").forEach(element => {
     const key = element.dataset.i18n;
@@ -121,11 +120,11 @@ function applyLanguage(language) {
     }
   });
 
-  // Translate Digital Lab cards.
-  const translatedTools = toolTranslations[selectedLanguage];
+  // Translate the actual homepage tool cards.
+  const translatedCards = toolTranslations[currentLanguage];
 
-  document.querySelectorAll(".lab-card").forEach((card, index) => {
-    const translated = translatedTools[index];
+  document.querySelectorAll(".tool-card").forEach((card, index) => {
+    const translated = translatedCards[index];
 
     if (!translated) return;
 
@@ -137,21 +136,22 @@ function applyLanguage(language) {
   });
 }
 
-// Initialize the language system.
-saveOriginalContent();
+// Start language system after the page is ready.
+function initializeLanguage() {
+  const languageSelect = document.getElementById("languageSelect");
 
-const languageSelect = document.getElementById("languageSelect");
+  if (!languageSelect) {
+    console.error("Language selector not found.");
+    return;
+  }
 
-if (languageSelect) {
-  const savedLanguage =
-    localStorage.getItem("ayush-language") || "gb";
+  saveOriginalContent();
+
+  const savedLanguage = localStorage.getItem("ayush-language") || "en";
 
   languageSelect.value = savedLanguage;
-
-  // Apply saved language on page load.
   applyLanguage(savedLanguage);
 
-  // Change language immediately when selected.
   languageSelect.addEventListener("change", function () {
     const selectedLanguage = this.value;
 
@@ -159,4 +159,10 @@ if (languageSelect) {
 
     applyLanguage(selectedLanguage);
   });
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initializeLanguage);
+} else {
+  initializeLanguage();
 }
