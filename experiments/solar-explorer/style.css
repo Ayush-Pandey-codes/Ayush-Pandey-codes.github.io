@@ -250,36 +250,95 @@ button {
 
 /* Sun */
 
+.sun 
 .sun {
   position: absolute;
   top: 50%;
   left: 50%;
   z-index: 2;
-  width: 9%;
+  width: 10%;
   aspect-ratio: 1;
   transform: translate(-50%, -50%);
   border-radius: 50%;
+
   background:
-    radial-gradient(circle at 35% 35%, #fff4b0, #ffb52e 48%, #f36b22);
+    radial-gradient(
+      circle at 35% 30%,
+      #fffde7 0%,
+      #fff176 15%,
+      #ffca28 38%,
+      #ff8f00 68%,
+      #e65100 100%
+    );
+
   box-shadow:
-    0 0 25px #ffb52e,
-    0 0 75px rgba(255, 160, 35, 0.6);
-  animation: sun-pulse 4s ease-in-out infinite;
+    0 0 15px #fff176,
+    0 0 35px #ffca28,
+    0 0 65px rgba(255, 152, 0, 0.9),
+    0 0 110px rgba(255, 87, 34, 0.55);
+
+  animation: sun-pulse 3s ease-in-out infinite;
+}
+
+.sun::before {
+  content: "";
+  position: absolute;
+  inset: -22%;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 183, 77, 0.35);
+  box-shadow:
+    0 0 20px rgba(255, 152, 0, 0.45),
+    inset 0 0 18px rgba(255, 183, 77, 0.25);
+  animation: solar-flare 5s linear infinite;
+}
+
+.sun::after {
+  content: "";
+  position: absolute;
+  inset: -45%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 193, 7, 0.2),
+    rgba(255, 87, 34, 0.08) 45%,
+    transparent 70%
+  );
+  z-index: -1;
+  animation: solar-glow 3s ease-in-out infinite;
 }
 
 @keyframes sun-pulse {
   0%, 100% {
-    box-shadow:
-      0 0 25px #ffb52e,
-      0 0 75px rgba(255, 160, 35, 0.6);
+    filter: brightness(1);
   }
 
   50% {
-    box-shadow:
-      0 0 40px #ffcc55,
-      0 0 110px rgba(255, 160, 35, 0.85);
+    filter: brightness(1.3);
   }
 }
+
+@keyframes solar-flare {
+  from {
+    transform: rotate(0deg) scale(1);
+  }
+
+  to {
+    transform: rotate(360deg) scale(1.08);
+  }
+}
+
+@keyframes solar-glow {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(0.95);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
 
 /* Orbit rings */
 
