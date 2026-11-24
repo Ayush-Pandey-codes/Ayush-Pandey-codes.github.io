@@ -1,725 +1,634 @@
 
-const PALETTE = {
-  A: { name: "Lavender", color: "#b99be8" },
-  B: { name: "Pink", color: "#e99bb7" },
-  C: { name: "Yellow", color: "#f2ca70" },
-  D: { name: "Green", color: "#8ebd98" },
-  E: { name: "Blue", color: "#83b5dc" },
-  F: { name: "Orange", color: "#e9a16e" },
-  G: { name: "Cream", color: "#f1e4c5" },
-  H: { name: "Red", color: "#df777c" }
+const COLORS = {
+  1: {name:"Lavender",hex:"#b99be8"},
+  2: {name:"Rose",hex:"#e99bb7"},
+  3: {name:"Sunshine",hex:"#f2ca70"},
+  4: {name:"Leaf",hex:"#8ebd98"},
+  5: {name:"Ocean",hex:"#83b5dc"},
+  6: {name:"Peach",hex:"#e9a16e"},
+  7: {name:"Cream",hex:"#f1e4c5"},
+  8: {name:"Coral",hex:"#df777c"}
 };
 
-// Each character represents one color.
-// Mystery pictures are intentionally shown only as numbered squares.
-const PUZZLES = [
-  {
-    id: "mystery-cat",
-    mode: "mystery",
-    title: "Little Cat",
-    description: "A tiny friend is waiting to be discovered.",
-    difficulty: "easy",
-    size: "10 × 10",
-    rows: [
-      "....AA....",
-      "...ABBA...",
-      "..ABBBBA..",
-      "..ABBBBA..",
-      ".ABBBBBBA.",
-      ".ABABABBA.",
-      ".ABBBBBBA.",
-      "..ABBBBA..",
-      "...ABBA...",
-      "....AA...."
-    ],
-    colors: ["A", "B"]
-  },
-  {
-    id: "mystery-flower",
-    mode: "mystery",
-    title: "Secret Flower",
-    description: "A little bloom hidden in the grid.",
-    difficulty: "easy",
-    size: "10 × 10",
-    rows: [
-      "...BBB....",
-      "..BBBBB...",
-      ".BBBCBBB..",
-      "..BBBBB...",
-      "...BBB....",
-      "....D.....",
-      "....D.....",
-      "...DDD....",
-      "..D...D...",
-     ".........."
-    ],
-    colors: ["B", "C", "D"]
-  },
-  {
-    id: "mystery-rocket",
-    mode: "mystery",
-    title: "Space Explorer",
-    description: "Color your way to a cosmic surprise.",
-    difficulty: "medium",
-    size: "10 × 10",
-    rows: [
-      "....A.....",
-      "...AAA....",
-      "..AAAAA...",
-      "..ABAAA...",
-      "..AAAAA...",
-      "..AAAAA...",
-      "..AAAAA...",
-      ".AA.A.AA..",
-      "AA...A..AA",
-      "....B....."
-    ],
-    colors: ["A", "B"]
-  },
-  {
-    id: "mystery-heart",
-    mode: "mystery",
-    title: "Secret Heart",
-    description: "A sweet surprise, one square at a time.",
-    difficulty: "medium",
-    size: "10 × 10",
-    rows: [
-      ".BB...BB..",
-      "BBBB.BBBB.",
-      "BBBBBBBBB.",
-      ".BBBBBBB..",
-      "..BBBBB...",
-      "...BBB....",
-      "....B.....",
-      "..........",
-      "..........",
-      ".........."
-    ],
-    colors: ["B"]
-  },
-  {
-    id: "classic-flower",
-    mode: "classic",
-    title: "Garden Flower",
-    description: "A cheerful flower with a colorful center.",
-    difficulty: "easy",
-    size: "12 × 12",
-    rows: [
-      "....BBB.....",
-      "...BBBBB....",
-      "..BBBBBBB...",
-      "...BBBBB....",
-      "....BBB.....",
-      ".....C......",
-      ".....D......",
-      ".....D......",
-      "...DDDDD....",
-      "..D..D..D...",
-      ".....D......",
-      ".....D......"
-    ],
-    colors: ["B", "C", "D"]
-  },
-  {
-    id: "classic-butterfly",
-    mode: "classic",
-    title: "Pretty Butterfly",
-    description: "Color the wings of this little butterfly.",
-    difficulty: "medium",
-    size: "12 × 12",
-    rows: [
-      "BB....AA....",
-      "BBB...AAA...",
-      "BBBB.AAAA...",
-      ".BBBB.AAA...",
-      "..BBB.AA....",
-      "...BB.A.....",
-      "....DD......",
-      "...DDDD.....",
-      "..D..DD.....",
-      ".D...DD.....",
-      "D....D......",
-      ".....D......"
-    ],
-    colors: ["A", "B", "D"]
-  },
-  {
-    id: "classic-house",
-    mode: "classic",
-    title: "Little House",
-    description: "A cozy little home waiting for color.",
-    difficulty: "easy",
-    size: "12 × 12",
-    rows: [
-      ".....HH.....",
-      "....HHHH....",
-      "...HHHHHH...",
-      "..HHHHHHHH..",
-      ".HHHHHHHHHH.",
-      "GGGGGGGGGGGG",
-      "GGGFFFFFGGGG",
-      "GGGFFFFFGGGG",
-      "GGGGGFGGGGGG",
-      "GGGGGFGGGGGG",
-      "GGGGGGGGGGGG",
-      "GGGGGGGGGGGG"
-    ],
-    colors: ["F", "G", "H"]
-  }
+const MYSTERY = [
+ {id:"cat",title:"Little Cat",difficulty:"easy",size:16,art:[
+ "................",
+ "......22..22....",
+ ".....22222222...",
+ "....2222222222..",
+ "...222222222222.",
+ "...222222222222.",
+ "..22222222222222",
+ "..22222222222222",
+ "..22222222222222",
+ "..22222222222222",
+ "...222222222222.",
+ "...222222222222.",
+ "....2222222222..",
+ ".....22222222...",
+ "......222222....",
+ "................"
+ ],map:{2:2}},
+ {id:"heart",title:"Secret Heart",difficulty:"easy",size:16,art:[
+ "................",
+ "...22......22...",
+ "..2222....2222..",
+ ".222222..222222.",
+ ".22222222222222.",
+ ".22222222222222.",
+ "..222222222222..",
+ "...2222222222...",
+ "....22222222....",
+ ".....222222.....",
+ "......2222......",
+ ".......22.......",
+ "........2.......",
+ "................",
+ "................",
+ "................"
+ ],map:{2:2}},
+ {id:"flower",title:"Blooming Flower",difficulty:"medium",size:16,art:[
+ ".......222......",
+ "......22222.....",
+ ".....2222222....",
+ "......22222.....",
+ ".......222......",
+ "........3.......",
+ "........4.......",
+ "........4.......",
+ ".....444444.....",
+ "....44...44.....",
+ "...44.....44....",
+ "................",
+ "................",
+ "................",
+ "................",
+ "................"
+ ],map:{2:2,3:3,4:4}},
+ {id:"rocket",title:"Space Rocket",difficulty:"medium",size:16,art:[
+ ".......11.......",
+ "......1111......",
+ ".....111111.....",
+ ".....111111.....",
+ ".....115111.....",
+ ".....111111.....",
+ ".....111111.....",
+ ".....111111.....",
+ ".....111111.....",
+ ".....111111.....",
+ "....11..11......",
+ "...11....11.....",
+ "..11......11....",
+ ".......66.......",
+ "......6666......",
+ ".....666666....."
+ ],map:{1:1,5:5,6:6}},
+ {id:"fish",title:"Ocean Friend",difficulty:"hard",size:20,art:[
+ "....................",
+ "....................",
+ ".......555..........",
+ ".....555555.........",
+ "...5555555555.......",
+ "..555555555555......",
+ ".555555555555555....",
+ ".5555555555555555...",
+ ".55555555555555555..",
+ ".5555555555555555...",
+ ".555555555555555....",
+ "..555555555555......",
+ "...5555555555.......",
+ ".....555555.........",
+ ".......555..........",
+ "....................",
+ "....................",
+ "....................",
+ "....................",
+ "...................."
+ ],map:{5:5}},
+ {id:"sun",title:"Sunshine",difficulty:"easy",size:16,art:[
+ ".......333......",
+ "....333333333...",
+ "...33333333333..",
+ "..3333333333333.",
+ ".333333333333333",
+ ".333333333333333",
+ ".333333333333333",
+ ".333333333333333",
+ ".333333333333333",
+ ".333333333333333",
+ ".333333333333333",
+ "..3333333333333.",
+ "...33333333333..",
+ "....333333333...",
+ ".......333......",
+ "................"
+ ],map:{3:3}}
 ];
 
-const elements = {
-  modeCards: document.querySelectorAll(".mode-card"),
-  gallery: document.querySelector("#puzzle-gallery"),
-  galleryTitle: document.querySelector("#gallery-title"),
-  galleryEyebrow: document.querySelector("#gallery-eyebrow"),
-  puzzleGrid: document.querySelector("#puzzle-grid"),
-  filters: document.querySelector("#difficulty-filters"),
-  playSection: document.querySelector("#play-section"),
-  playTitle: document.querySelector("#play-title"),
-  playModeLabel: document.querySelector("#play-mode-label"),
-  artwork: document.querySelector("#artwork"),
-  palette: document.querySelector("#palette-list"),
-  selectedNumber: document.querySelector("#selected-number"),
-  progressText: document.querySelector("#progress-text"),
-  progressBar: document.querySelector("#progress-bar"),
-  progressCaption: document.querySelector("#progress-caption"),
-  remainingLabel: document.querySelector("#remaining-label"),
-  canvasInstruction: document.querySelector("#canvas-instruction"),
-  canvasSize: document.querySelector("#canvas-size-label"),
-  completion: document.querySelector("#completion-overlay"),
-  completionTitle: document.querySelector("#completion-title"),
-  completionMessage: document.querySelector("#completion-message"),
-  toast: document.querySelector("#toast")
-};
+const CLASSIC = [
+ {id:"flower",title:"Garden Flower",difficulty:"easy",colors:[1,2,3,4],regions:[
+  {id:"petal1",d:"M150 105 C95 45 40 100 105 160 Q140 155 150 105Z",color:2,label:[105,112]},
+  {id:"petal2",d:"M150 105 C105 35 180 15 170 100 Q165 120 150 105Z",color:1,label:[154,75]},
+  {id:"petal3",d:"M150 105 C210 45 260 110 190 160 Q160 155 150 105Z",color:2,label:[198,115]},
+  {id:"petal4",d:"M150 105 C220 150 200 220 150 165 Q140 135 150 105Z",color:1,label:[179,171]},
+  {id:"petal5",d:"M150 105 C100 165 95 220 150 165 Q165 135 150 105Z",color:2,label:[121,171]},
+  {id:"center",d:"M150 105 C170 80 205 110 185 135 C165 160 130 140 135 115Z",color:3,label:[165,119]},
+  {id:"stem",d:"M145 145 Q150 210 142 265 L160 265 Q154 205 158 145Z",color:4,label:[151,225]},
+  {id:"leaf1",d:"M148 205 Q80 155 70 210 Q105 245 148 205Z",color:4,label:[108,204]},
+  {id:"leaf2",d:"M153 225 Q220 170 232 220 Q200 260 153 225Z",color:4,label:[196,222]}
+ ]},
+ {id:"butterfly",title:"Colorful Butterfly",difficulty:"medium",colors:[1,2,3,5],regions:[
+  {id:"lefttop",d:"M145 135 C65 15 10 60 55 155 Q100 185 145 135Z",color:1,label:[77,105]},
+  {id:"leftbottom",d:"M145 145 C75 150 55 255 110 235 Q145 210 145 145Z",color:2,label:[103,193]},
+  {id:"righttop",d:"M155 135 C235 15 290 60 245 155 Q200 185 155 135Z",color:3,label:[222,105]},
+  {id:"rightbottom",d:"M155 145 C225 150 245 255 190 235 Q155 210 155 145Z",color:5,label:[197,193]},
+  {id:"body",d:"M145 80 Q150 60 155 80 L158 230 Q150 250 142 230Z",color:3,label:[150,185]},
+  {id:"head",d:"M140 80 Q150 60 160 80 Q165 100 150 105 Q135 100 140 80Z",color:1,label:[150,83]},
+  {id:"wingdetail1",d:"M75 100 Q105 65 125 125 Q100 150 75 100Z",color:5,label:[101,111]},
+  {id:"wingdetail2",d:"M225 100 Q195 65 175 125 Q200 150 225 100Z",color:2,label:[199,111]}
+ ]},
+ {id:"mandala",title:"Mandala Garden",difficulty:"hard",colors:[1,2,3,4,5],regions:[
+  {id:"outer1",d:"M150 12 Q210 65 150 105 Q90 65 150 12Z",color:1,label:[150,54]},
+  {id:"outer2",d:"M288 150 Q235 210 195 150 Q235 90 288 150Z",color:2,label:[244,150]},
+  {id:"outer3",d:"M150 288 Q90 235 150 195 Q210 235 150 288Z",color:3,label:[150,244]},
+  {id:"outer4",d:"M12 150 Q65 90 105 150 Q65 210 12 150Z",color:4,label:[56,150]},
+  {id:"diag1",d:"M52 52 Q125 55 150 105 Q95 125 52 52Z",color:5,label:[92,83]},
+  {id:"diag2",d:"M248 52 Q175 55 150 105 Q205 125 248 52Z",color:3,label:[208,83]},
+  {id:"diag3",d:"M248 248 Q175 245 150 195 Q205 175 248 248Z",color:1,label:[208,218]},
+  {id:"diag4",d:"M52 248 Q125 245 150 195 Q95 175 52 248Z",color:2,label:[92,218]},
+  {id:"center",d:"M150 105 Q195 105 195 150 Q195 195 150 195 Q105 195 105 150 Q105 105 150 105Z",color:4,label:[150,150]}
+ ]}
+];
 
-let currentMode = "mystery";
-let currentPuzzle = null;
-let selectedColor = null;
-let coloredCells = new Map();
-let numbersVisible = true;
-let activeFilter = "all";
-let toastTimeout = null;
+const $ = s => document.querySelector(s);
+const allPuzzles = [
+ ...MYSTERY.map(p=>({...p,mode:"mystery"})),
+ ...CLASSIC.map(p=>({...p,mode:"classic"}))
+];
 
-function showToast(message) {
-  elements.toast.textContent = message;
-  elements.toast.classList.add("show");
-  clearTimeout(toastTimeout);
-  toastTimeout = setTimeout(() => {
-    elements.toast.classList.remove("show");
-  }, 2400);
+let mode="mystery";
+let puzzle=null;
+let selected=1;
+let erasing=false;
+let numbers=true;
+let zoom=1;
+let history=[];
+let historyIndex=-1;
+let fills={};
+let filter="all";
+let toastTimer;
+
+function toast(message){
+ const el=$("#toast");
+ el.textContent=message;
+ el.classList.add("show");
+ clearTimeout(toastTimer);
+ toastTimer=setTimeout(()=>el.classList.remove("show"),2200);
 }
 
-function getPuzzleColors(puzzle) {
-  return puzzle.colors.map((key, index) => ({
-    key,
-    number: index + 1,
-    ...PALETTE[key]
-  }));
+function showSection(id){
+ ["gallery-section","studio","artwork-section"].forEach(x=>$("#"+x).classList.add("hidden"));
+ if(id)$("#"+id).classList.remove("hidden");
 }
 
-function getRows(puzzle) {
-  return puzzle.rows.map(row => row.split(""));
+function enterMode(next){
+ mode=next;
+ filter="all";
+ $(".how-section").classList.remove("hidden");
+ $("#gallery-label").textContent=next==="mystery"?"THE HIDDEN COLLECTION":"THE ILLUSTRATION COLLECTION";
+ $("#gallery-title").textContent=next==="mystery"?"Mystery puzzles":"Classic coloring pages";
+ $("#filters").querySelectorAll("button").forEach(b=>b.classList.toggle("active",b.dataset.filter==="all"));
+ showSection("gallery-section");
+ renderGallery();
+ $("#gallery-section").scrollIntoView({behavior:"smooth"});
 }
 
-function getAllCells(puzzle) {
-  return getRows(puzzle).flat();
-}
-
-function countColor(puzzle, key) {
-  return getAllCells(puzzle).filter(cell => cell === key).length;
-}
-
-function showGallery(mode) {
-  currentMode = mode;
-  activeFilter = "all";
-
-  elements.playSection.classList.add("hidden");
-  elements.gallery.classList.remove("hidden");
-  document.querySelector(".mode-section").classList.add("hidden");
-
-  if (mode === "mystery") {
-    elements.galleryEyebrow.textContent = "THE SURPRISE COLLECTION";
-    elements.galleryTitle.textContent = "Mystery puzzles";
-  } else {
-    elements.galleryEyebrow.textContent = "THE CLASSIC COLLECTION";
-    elements.galleryTitle.textContent = "Coloring pages";
-  }
-
-  document.querySelectorAll(".filter").forEach(button => {
-    button.classList.toggle("active", button.dataset.difficulty === "all");
-  });
-
-  renderGallery();
-  elements.gallery.scrollIntoView({ behavior: "smooth", block: "start" });
-}
-
-function renderGallery() {
-  const puzzles = PUZZLES.filter(puzzle => {
-    const correctMode = puzzle.mode === currentMode;
-    const correctDifficulty =
-      activeFilter === "all" || puzzle.difficulty === activeFilter;
-    return correctMode && correctDifficulty;
-  });
-
-  elements.puzzleGrid.innerHTML = "";
-
-  puzzles.forEach(puzzle => {
-    const card = document.createElement("button");
-    card.className = "puzzle-card";
-    card.type = "button";
-
-    const preview = document.createElement("div");
-    preview.className = "puzzle-preview";
-
-    if (puzzle.mode === "mystery") {
-      const grid = document.createElement("div");
-      grid.className = "preview-grid";
-      grid.style.gridTemplateColumns = `repeat(${puzzle.rows[0].length}, 1fr)`;
-
-      getAllCells(puzzle).forEach((key, index) => {
-        const cell = document.createElement("span");
-        cell.className = "preview-cell";
-        cell.textContent = key === "." ? "" : "?";
-        grid.appendChild(cell);
-      });
-
-      preview.appendChild(grid);
-    } else {
-      const flower = document.createElement("span");
-      flower.className = "preview-flower";
-      flower.textContent = puzzle.id.includes("flower") ? "✿" :
-        puzzle.id.includes("butterfly") ? "🦋" : "⌂";
-      preview.appendChild(flower);
+function renderGallery(){
+ const grid=$("#puzzle-grid");
+ grid.innerHTML="";
+ allPuzzles.filter(p=>p.mode===mode&&(filter==="all"||p.difficulty===filter)).forEach(p=>{
+  const card=document.createElement("button");
+  card.className="puzzle-card";
+  const thumb=document.createElement("div");
+  thumb.className="puzzle-thumb";
+  if(p.mode==="mystery"){
+   const canvas=document.createElement("canvas");
+   canvas.width=p.size;canvas.height=p.size;
+   const ctx=canvas.getContext("2d");
+   const cell=canvas.width/p.size;
+   p.art.forEach((row,y)=>[...row].forEach((v,x)=>{
+    ctx.fillStyle=v==="."?"#292634":"#393247";
+    ctx.fillRect(x*cell,y*cell,cell,cell);
+    if(v!=="."){
+     ctx.fillStyle="#e4d5ff";ctx.font="bold 9px Arial";
+     ctx.textAlign="center";ctx.textBaseline="middle";
+     ctx.fillText(v,x*cell+cell/2,y*cell+cell/2);
     }
-
-    const info = document.createElement("div");
-    info.className = "puzzle-info";
-
-    const heading = document.createElement("h3");
-    heading.textContent = puzzle.title;
-
-    const description = document.createElement("p");
-    description.textContent = puzzle.description;
-
-    const meta = document.createElement("div");
-    meta.className = "puzzle-meta";
-
-    const difficulty = document.createElement("span");
-    difficulty.textContent =
-      puzzle.difficulty.charAt(0).toUpperCase() + puzzle.difficulty.slice(1);
-
-    const size = document.createElement("span");
-    size.textContent = puzzle.size;
-
-    meta.append(difficulty, size);
-    info.append(heading, description, meta);
-    card.append(preview, info);
-
-    card.addEventListener("click", () => startPuzzle(puzzle.id));
-    elements.puzzleGrid.appendChild(card);
-  });
-
-  if (!puzzles.length) {
-    elements.puzzleGrid.textContent = "No puzzles found for this difficulty.";
+   }));
+   thumb.append(canvas);
+  }else{
+   const icon=document.createElement("span");
+   icon.className="thumb-flower";
+   icon.textContent=p.id==="butterfly"?"🦋":p.id==="mandala"?"❀":"✿";
+   thumb.append(icon);
   }
+  const info=document.createElement("div");info.className="puzzle-info";
+  const h=document.createElement("h3");h.textContent=p.title;
+  const desc=document.createElement("p");
+  desc.textContent=p.mode==="mystery"?"Reveal the hidden picture one number at a time.":"Color individual outlined regions in this illustration.";
+  const meta=document.createElement("div");meta.className="puzzle-meta";
+  meta.innerHTML=`<span>${p.difficulty}</span><span>${p.mode==="mystery"?p.size+" × "+p.size:"SVG illustration"}</span>`;
+  info.append(h,desc,meta);card.append(thumb,info);
+  card.addEventListener("click",()=>startPuzzle(p.id,p.mode));
+  grid.append(card);
+ });
 }
 
-function startPuzzle(id) {
-  const puzzle = PUZZLES.find(item => item.id === id);
-  if (!puzzle) return;
+function getPuzzle(id,kind){return allPuzzles.find(p=>p.id===id&&p.mode===kind)}
 
-  currentPuzzle = puzzle;
-  coloredCells = new Map();
-  selectedColor = puzzle.colors[0];
-  numbersVisible = true;
-
-  elements.gallery.classList.add("hidden");
-  elements.playSection.classList.remove("hidden");
-  elements.playTitle.textContent = puzzle.title;
-  elements.playModeLabel.textContent =
-    puzzle.mode === "mystery" ? "MYSTERY COLOR" : "CLASSIC COLOR";
-  elements.canvasSize.textContent = puzzle.size.toUpperCase() + " GRID";
-  elements.completion.classList.add("hidden");
-
-  renderPalette();
-  renderArtwork();
-  updateProgress();
-
-  elements.playSection.scrollIntoView({ behavior: "smooth", block: "start" });
+function startPuzzle(id,kind){
+ puzzle=getPuzzle(id,kind);
+ fills=loadProgress(puzzle);
+ selected=puzzle.mode==="mystery"?Number(Object.keys(puzzle.map)[0]):puzzle.colors[0];
+ erasing=false;numbers=true;zoom=1;
+ history=[];historyIndex=-1;
+ saveHistory();
+ $("#studio-title").textContent=puzzle.title;
+ $("#studio-mode").textContent=kind==="mystery"?"MYSTERY COLOR":"CLASSIC COLOR";
+ $("#workspace-type").textContent=kind==="mystery"?"PIXEL MYSTERY GRID":"ILLUSTRATED COLORING PAGE";
+ $("#completion").classList.add("hidden");
+ showSection("studio");
+ renderPalette();
+ renderArtwork();
+ updateProgress();
+ $("#studio").scrollIntoView({behavior:"smooth"});
 }
 
-function renderPalette() {
-  elements.palette.innerHTML = "";
-  const colors = getPuzzleColors(currentPuzzle);
+function loadProgress(p){
+ try{return JSON.parse(localStorage.getItem("colorstudio-progress-"+p.id))||{}}
+ catch{return {}}
+}
 
-  colors.forEach(item => {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "palette-choice";
-    button.dataset.color = item.key;
+function saveProgress(){
+ if(!puzzle)return;
+ localStorage.setItem("colorstudio-progress-"+puzzle.id,JSON.stringify(fills));
+}
 
-    const dot = document.createElement("span");
-    dot.className = "color-dot";
-    dot.style.backgroundColor = item.color;
+function getColors(){
+ return puzzle.mode==="mystery"
+  ? Object.entries(puzzle.map).map(([number,color])=>({number:Number(number),color,name:COLORS[color].name,hex:COLORS[color].hex}))
+  : puzzle.colors.map(n=>({number:n,color:n,name:COLORS[n].name,hex:COLORS[n].hex}));
+}
 
-    const name = document.createElement("span");
-    name.textContent = item.name;
-
-    const number = document.createElement("strong");
-    number.textContent = item.number;
-
-    button.append(dot, name, number);
-    button.addEventListener("click", () => selectColor(item.key));
-    elements.palette.appendChild(button);
+function renderPalette(){
+ const box=$("#palette");box.innerHTML="";
+ getColors().forEach(item=>{
+  const button=document.createElement("button");
+  button.className="palette-choice";
+  button.dataset.number=item.number;
+  button.innerHTML=`<span class="color-dot" style="background:${item.hex}"></span><span>${item.name}</span><strong>${item.number}</strong>`;
+  button.addEventListener("click",()=>{
+   selected=item.number;erasing=false;updatePalette();updateInstruction();
   });
-
-  updatePaletteSelection();
+  box.append(button);
+ });
+ updatePalette();
 }
 
-function selectColor(key) {
-  selectedColor = key;
-  updatePaletteSelection();
-
-  const number = currentPuzzle.colors.indexOf(key) + 1;
-  elements.canvasInstruction.textContent = `Select the squares marked ${number}`;
-  elements.selectedNumber.textContent = number;
+function updatePalette(){
+ $("#current-number").textContent=erasing?"⌫":selected;
+ document.querySelectorAll(".palette-choice").forEach(b=>{
+  const n=Number(b.dataset.number);
+  b.classList.toggle("selected",n===selected&&!erasing);
+  const total=totalFor(n);
+  const done=Object.values(fills).filter(v=>v===n).length;
+  b.classList.toggle("completed",total>0&&done>=total);
+ });
 }
 
-function updatePaletteSelection() {
-  if (!currentPuzzle) return;
-
-  const colors = getPuzzleColors(currentPuzzle);
-  elements.selectedNumber.textContent =
-    currentPuzzle.colors.indexOf(selectedColor) + 1;
-
-  elements.palette.querySelectorAll(".palette-choice").forEach(button => {
-    const key = button.dataset.color;
-    const total = countColor(currentPuzzle, key);
-    const completed = [...coloredCells.values()].filter(value => value === key).length;
-
-    button.classList.toggle("selected", key === selectedColor);
-    button.classList.toggle("completed", completed === total);
-  });
+function updateInstruction(){
+ $("#workspace-instruction").textContent=erasing?"Select a colored area to erase":`Selected color ${selected} — find matching areas`;
 }
 
-function renderArtwork() {
-  const rows = getRows(currentPuzzle);
-  const columns = rows[0].length;
-
-  elements.artwork.innerHTML = "";
-  elements.artwork.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
-
-  rows.forEach((row, rowIndex) => {
-    row.forEach((key, columnIndex) => {
-      const index = rowIndex * columns + columnIndex;
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "art-cell";
-      button.dataset.index = index;
-      button.setAttribute("aria-label", `Puzzle square ${index + 1}`);
-
-      if (key === ".") {
-        button.style.background = "#fffdf8";
-        button.disabled = true;
-        button.setAttribute("aria-label", "Blank square");
-      } else {
-        const number = currentPuzzle.colors.indexOf(key) + 1;
-        button.dataset.answer = key;
-        button.textContent = numbersVisible ? number : "";
-
-        if (coloredCells.has(index)) {
-          button.style.backgroundColor = PALETTE[key].color;
-          button.classList.add("colored");
-          button.textContent = "";
-        }
-
-        button.addEventListener("click", () => colorCell(index, key, button));
-      }
-
-      elements.artwork.appendChild(button);
-    });
-  });
+function totalFor(n){
+ if(puzzle.mode==="mystery"){
+  return puzzle.art.reduce((sum,row)=>sum+[...row].filter(v=>Number(v)===n).length,0);
+ }
+ return puzzle.regions.filter(r=>r.color===n).length;
 }
 
-function colorCell(index, answer, button) {
-  if (coloredCells.has(index)) return;
+function renderArtwork(){
+ const content=$("#canvas-content");
+ content.innerHTML="";
+ content.style.transform=`scale(${zoom})`;
+ if(puzzle.mode==="mystery")renderMystery(content);
+ else renderClassic(content);
+}
 
-  if (!selectedColor) {
-    showToast("Choose a color first.");
-    return;
+function renderMystery(content){
+ const grid=document.createElement("div");
+ grid.className="pixel-grid";
+ grid.style.gridTemplateColumns=`repeat(${puzzle.size},1fr)`;
+ puzzle.art.forEach((row,y)=>[...row].forEach((char,x)=>{
+  const cell=document.createElement("button");
+  cell.className="pixel-cell";
+  const key=`${y}-${x}`;
+  if(char==="."){
+   cell.classList.add("blank");cell.disabled=true;
+  }else{
+   const answer=puzzle.map[Number(char)]??Number(char);
+   if(fills[key]){
+    cell.style.background=COLORS[fills[key]].hex;
+    cell.classList.add("filled");
+   }else if(numbers){
+    cell.textContent=char;
+   }
+   cell.setAttribute("aria-label",`Row ${y+1}, column ${x+1}, number ${char}`);
+   cell.addEventListener("click",()=>paint(key,answer,cell));
   }
-
-  if (selectedColor !== answer) {
-    button.classList.remove("correct-flash");
-    void button.offsetWidth;
-    button.classList.add("correct-flash");
-    showToast("Not quite! Try another color.");
-    return;
-  }
-
-  coloredCells.set(index, answer);
-  button.style.backgroundColor = PALETTE[answer].color;
-  button.classList.add("colored");
-  button.textContent = "";
-
-  updateProgress();
-  updatePaletteSelection();
-
-  if (coloredCells.size === getAllCells(currentPuzzle).filter(key => key !== ".").length) {
-    finishPuzzle();
-  }
+  grid.append(cell);
+ }));
+ content.append(grid);
 }
 
-function updateProgress() {
-  const total = getAllCells(currentPuzzle).filter(key => key !== ".").length;
-  const completed = coloredCells.size;
-  const percentage = total ? Math.round(completed / total * 100) : 0;
-
-  elements.progressText.textContent = percentage + "%";
-  elements.progressBar.style.width = percentage + "%";
-  elements.remainingLabel.textContent = `${completed} / ${total} squares colored`;
-
-  if (percentage === 0) {
-    elements.progressCaption.textContent = "Let's get coloring!";
-  } else if (percentage < 50) {
-    elements.progressCaption.textContent = "You're making progress!";
-  } else if (percentage < 100) {
-    elements.progressCaption.textContent = "Looking good. Keep going!";
-  } else {
-    elements.progressCaption.textContent = "Every square is complete!";
+function renderClassic(content){
+ const ns="http://www.w3.org/2000/svg";
+ const svg=document.createElementNS(ns,"svg");
+ svg.setAttribute("viewBox","0 0 300 300");
+ svg.setAttribute("class","classic-svg");
+ puzzle.regions.forEach(region=>{
+  const path=document.createElementNS(ns,"path");
+  path.setAttribute("d",region.d);
+  path.setAttribute("class","region");
+  path.setAttribute("fill",fills[region.id]?COLORS[fills[region.id]].hex:"#fffdf8");
+  path.addEventListener("click",()=>paint(region.id,region.color,path));
+  svg.append(path);
+  if(numbers&&!fills[region.id]){
+   const label=document.createElementNS(ns,"text");
+   label.setAttribute("x",region.label[0]);
+   label.setAttribute("y",region.label[1]);
+   label.setAttribute("class","region-label");
+   label.textContent=region.color;
+   svg.append(label);
   }
+ });
+ content.append(svg);
 }
 
-function finishPuzzle() {
-  elements.completion.classList.remove("hidden");
+function paint(key,answer,target){
+ if(erasing){
+  if(!fills[key])return;
+  delete fills[key];saveHistory();renderArtwork();updateProgress();return;
+ }
+ if(fills[key])return;
+ if(selected!==answer){
+  target.classList.add("wrong");
+  setTimeout(()=>target.classList.remove("wrong"),250);
+  toast("That section needs another color.");
+  return;
+ }
+ fills[key]=selected;
+ saveHistory();
+ saveProgress();
+ renderArtwork();
+ updateProgress();
+ updatePalette();
+}
 
-  if (currentPuzzle.mode === "mystery") {
-    elements.completionTitle.textContent = "The mystery is solved!";
-    elements.completionMessage.textContent =
-      `You discovered: ${currentPuzzle.title}. What a lovely surprise!`;
-  } else {
-    elements.completionTitle.textContent = "Beautifully colored!";
-    elements.completionMessage.textContent =
-      `You completed ${currentPuzzle.title}. Your artwork is ready!`;
+function updateProgress(){
+ if(!puzzle)return;
+ const total=puzzle.mode==="mystery"
+  ? puzzle.art.reduce((s,row)=>s+[...row].filter(c=>c!==".").length,0)
+  : puzzle.regions.length;
+ const done=Object.keys(fills).length;
+ const percent=Math.round(done/total*100);
+ $("#progress-value").textContent=percent+"%";
+ $("#progress-fill").style.width=percent+"%";
+ $("#cell-count").textContent=`${done} / ${total} areas colored`;
+ $("#progress-caption").textContent=percent===100?"Every area is complete!":percent>50?"Your artwork is taking shape!":"Every color brings you closer.";
+ if(percent===100)finishPuzzle();
+}
+
+function finishPuzzle(){
+ $("#completion").classList.remove("hidden");
+ $("#completion-title").textContent=puzzle.mode==="mystery"?"Mystery revealed!":"Beautifully finished!";
+ $("#completion-text").textContent=`You completed ${puzzle.title}. Your artwork is ready to save!`;
+ saveArtwork();
+}
+
+function saveHistory(){
+ const snapshot=JSON.stringify(fills);
+ history=history.slice(0,historyIndex+1);
+ history.push(snapshot);
+ if(history.length>60)history.shift();
+ historyIndex=history.length-1;
+}
+
+function restoreHistory(index){
+ if(index<0||index>=history.length)return;
+ historyIndex=index;
+ fills=JSON.parse(history[historyIndex]);
+ saveProgress();
+ renderArtwork();updateProgress();updatePalette();
+}
+
+function undo(){if(historyIndex>0)restoreHistory(historyIndex-1);else toast("Nothing to undo.");}
+function redo(){if(historyIndex<history.length-1)restoreHistory(historyIndex+1);else toast("Nothing to redo.");}
+
+function resetPuzzle(){
+ if(!puzzle)return;
+ if(!confirm("Reset all coloring for this puzzle?"))return;
+ fills={};localStorage.removeItem("colorstudio-progress-"+puzzle.id);
+ history=[];historyIndex=-1;saveHistory();
+ $("#completion").classList.add("hidden");
+ renderArtwork();updateProgress();updatePalette();toast("Puzzle reset.");
+}
+
+function giveHint(){
+ if(!puzzle)return;
+ if(puzzle.mode==="mystery"){
+  for(let y=0;y<puzzle.size;y++){
+   for(let x=0;x<puzzle.size;x++){
+    const key=`${y}-${x}`,char=puzzle.art[y][x];
+    if(char!=="."&&!fills[key]){
+     selected=puzzle.map[Number(char)]??Number(char);
+     erasing=false;updatePalette();updateInstruction();
+     toast(`Hint: look for number ${char}.`);
+     const cells=$$(".pixel-cell");
+     const index=y*puzzle.size+x;
+     cells[index]?.scrollIntoView({behavior:"smooth",block:"nearest"});
+     return;
+    }
+   }
   }
-
-  showToast("Puzzle completed! ✦");
+ }else{
+  const region=puzzle.regions.find(r=>!fills[r.id]);
+  if(region){
+   selected=region.color;erasing=false;updatePalette();updateInstruction();
+   toast(`Hint: look for color ${selected}.`);
+   return;
+  }
+ }
+ toast("All sections are colored!");
 }
 
-function resetPuzzle() {
-  if (!currentPuzzle) return;
-
-  coloredCells.clear();
-  elements.completion.classList.add("hidden");
-  renderArtwork();
-  updateProgress();
-  updatePaletteSelection();
-  showToast("Puzzle reset. Have another go!");
+function toggleNumbers(){
+ numbers=!numbers;renderArtwork();
+ toast(numbers?"Numbers shown.":"Numbers hidden.");
 }
 
-function toggleNumbers(visible) {
-  numbersVisible = visible;
+function changeZoom(amount){
+ zoom=Math.max(.65,Math.min(2.2,zoom+amount));
+ $("#canvas-content").style.transform=`scale(${zoom})`;
+}
 
-  elements.artwork.querySelectorAll(".art-cell:not(:disabled)").forEach(button => {
-    const index = Number(button.dataset.index);
-    if (coloredCells.has(index)) return;
+function createPrint(){
+ if(!puzzle)return;
+ const old=document.querySelector(".print-output");old?.remove();
+ const sheet=document.createElement("section");
+ sheet.className="print-output";
+ const title=document.createElement("h1");title.textContent="Color Studio — "+puzzle.title;
+ const note=document.createElement("p");note.textContent="Color each numbered area using the matching color in the key. The picture is a surprise!";
+ sheet.append(title,note);
+ if(puzzle.mode==="mystery"){
+  const grid=document.createElement("div");grid.className="print-grid";
+  grid.style.gridTemplateColumns=`repeat(${puzzle.size},1fr)`;
+  puzzle.art.forEach(row=>[...row].forEach(char=>{
+   const cell=document.createElement("div");cell.className="print-cell";
+   cell.textContent=char==="."?"":char;
+   grid.append(cell);
+  }));
+  sheet.append(grid);
+ }else{
+  const holder=document.createElement("div");
+  const clone=document.querySelector(".classic-svg")?.cloneNode(true);
+  if(clone){
+   clone.querySelectorAll(".region").forEach(p=>p.setAttribute("fill","white"));
+   clone.querySelectorAll(".region-label").forEach(t=>t.setAttribute("fill","black"));
+   holder.append(clone);
+  }
+  sheet.append(holder);
+ }
+ const heading=document.createElement("h2");heading.textContent="Color key";
+ const key=document.createElement("div");key.className="print-key";
+ getColors().forEach(item=>{
+  const entry=document.createElement("div");entry.className="print-key-item";
+  const swatch=document.createElement("span");swatch.className="swatch";swatch.style.background=item.hex;
+  const label=document.createElement("span");label.textContent=`${item.number} — ${item.name}`;
+  entry.append(swatch,label);key.append(entry);
+ });
+ sheet.append(heading,key);
+ document.body.append(sheet);
+ window.print();
+ setTimeout(()=>sheet.remove(),1200);
+}
 
-    const key = button.dataset.answer;
-    button.textContent = visible
-      ? currentPuzzle.colors.indexOf(key) + 1
-      : "";
+function makeSVG(){
+ const ns="http://www.w3.org/2000/svg";
+ const svg=document.createElementNS(ns,"svg");
+ if(puzzle.mode==="classic"){
+  svg.setAttribute("viewBox","0 0 300 300");
+  puzzle.regions.forEach(r=>{
+   const path=document.createElementNS(ns,"path");
+   path.setAttribute("d",r.d);
+   path.setAttribute("fill",fills[r.id]?COLORS[fills[r.id]].hex:"#fffdf8");
+   path.setAttribute("stroke","#26212b");path.setAttribute("stroke-width","2.5");
+   svg.append(path);
   });
-
-  showToast(visible ? "Numbers are visible." : "Numbers are hidden.");
+ }else{
+  const cell=20;
+  svg.setAttribute("viewBox",`0 0 ${puzzle.size*cell} ${puzzle.size*cell}`);
+  puzzle.art.forEach((row,y)=>[...row].forEach((char,x)=>{
+   if(char===".")return;
+   const key=`${y}-${x}`,answer=puzzle.map[Number(char)]??Number(char);
+   const rect=document.createElementNS(ns,"rect");
+   rect.setAttribute("x",x*cell);rect.setAttribute("y",y*cell);
+   rect.setAttribute("width",cell);rect.setAttribute("height",cell);
+   rect.setAttribute("fill",fills[key]?COLORS[fills[key]].hex:"#fffdf8");
+   rect.setAttribute("stroke","#777");rect.setAttribute("stroke-width",".5");
+   svg.append(rect);
+  }));
+ }
+ return svg;
 }
 
-function giveHint() {
-  if (!currentPuzzle) return;
-
-  const cells = [...elements.artwork.querySelectorAll(".art-cell:not(:disabled)")];
-  const next = cells.find(button => !coloredCells.has(Number(button.dataset.index)));
-
-  if (!next) {
-    showToast("Everything is already colored!");
-    return;
-  }
-
-  const answer = next.dataset.answer;
-  selectColor(answer);
-
-  next.classList.add("correct-flash");
-  setTimeout(() => next.classList.remove("correct-flash"), 1200);
-  showToast(`Hint: try color ${currentPuzzle.colors.indexOf(answer) + 1}.`);
+function downloadPNG(){
+ if(!puzzle)return;
+ const svg=makeSVG();
+ const serializer=new XMLSerializer();
+ const source=serializer.serializeToString(svg);
+ const blob=new Blob([source],{type:"image/svg+xml;charset=utf-8"});
+ const url=URL.createObjectURL(blob);
+ const img=new Image();
+ img.onload=()=>{
+  const canvas=document.createElement("canvas");
+  canvas.width=900;canvas.height=900;
+  const ctx=canvas.getContext("2d");
+  ctx.fillStyle="#fffdf8";ctx.fillRect(0,0,900,900);
+  ctx.drawImage(img,0,0,900,900);
+  URL.revokeObjectURL(url);
+  const a=document.createElement("a");
+  a.download=puzzle.id+"-color-studio.png";
+  a.href=canvas.toDataURL("image/png");a.click();
+  toast("Artwork downloaded!");
+ };
+ img.onerror=()=>{URL.revokeObjectURL(url);toast("Could not export this image.");};
+ img.src=url;
 }
 
-function createPrintSheet() {
-  if (!currentPuzzle) return;
-
-  const oldSheet = document.querySelector(".print-sheet");
-  if (oldSheet) oldSheet.remove();
-
-  const sheet = document.createElement("section");
-  sheet.className = "print-sheet";
-
-  const title = document.createElement("h1");
-  title.textContent = "Color Studio — " + currentPuzzle.title;
-
-  const instructions = document.createElement("p");
-  instructions.textContent =
-    "Color each numbered square using the matching color in the key. Have fun!";
-
-  const grid = document.createElement("div");
-  grid.className = "print-grid";
-
-  const rows = getRows(currentPuzzle);
-  const columns = rows[0].length;
-  grid.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
-
-  rows.forEach(row => {
-    row.forEach(key => {
-      const cell = document.createElement("div");
-      cell.className = "print-cell";
-
-      if (key === ".") {
-        cell.textContent = "";
-      } else {
-        cell.textContent = currentPuzzle.colors.indexOf(key) + 1;
-      }
-
-      grid.appendChild(cell);
-    });
-  });
-
-  const keyHeading = document.createElement("h2");
-  keyHeading.textContent = "Color key";
-
-  const key = document.createElement("div");
-  key.className = "print-key";
-
-  getPuzzleColors(currentPuzzle).forEach(item => {
-    const entry = document.createElement("div");
-    entry.className = "print-key-item";
-
-    const swatch = document.createElement("span");
-    swatch.className = "print-swatch";
-    swatch.style.backgroundColor = item.color;
-
-    const label = document.createElement("span");
-    label.textContent = `${item.number} — ${item.name}`;
-
-    entry.append(swatch, label);
-    key.appendChild(entry);
-  });
-
-  const note = document.createElement("p");
-  note.className = "print-note";
-  note.textContent = "Tip: Use colored pencils, crayons or markers. Keep the color key nearby while coloring.";
-
-  sheet.append(title, instructions, grid, keyHeading, key, note);
-  document.body.appendChild(sheet);
-
-  window.print();
-
-  setTimeout(() => sheet.remove(), 1500);
+function saveArtwork(){
+ const key="colorstudio-completed";
+ let items=[];
+ try{items=JSON.parse(localStorage.getItem(key))||[]}catch{}
+ if(!items.some(item=>item.id===puzzle.id)){
+  items.push({id:puzzle.id,title:puzzle.title,mode:puzzle.mode,date:new Date().toLocaleDateString()});
+  localStorage.setItem(key,JSON.stringify(items));
+ }
 }
 
-function downloadArtwork() {
-  if (!currentPuzzle) return;
-
-  const rows = getRows(currentPuzzle);
-  const columns = rows[0].length;
-  const cellSize = 50;
-  const canvas = document.createElement("canvas");
-
-  canvas.width = columns * cellSize;
-  canvas.height = rows.length * cellSize;
-
-  const ctx = canvas.getContext("2d");
-  ctx.fillStyle = "#fffdf8";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  rows.forEach((row, rowIndex) => {
-    row.forEach((key, columnIndex) => {
-      if (key === ".") return;
-
-      const index = rowIndex * columns + columnIndex;
-      const x = columnIndex * cellSize;
-      const y = rowIndex * cellSize;
-
-      ctx.fillStyle = coloredCells.has(index)
-        ? PALETTE[key].color
-        : "#fffdf8";
-
-      ctx.fillRect(x, y, cellSize, cellSize);
-      ctx.strokeStyle = "#777";
-      ctx.lineWidth = 1;
-      ctx.strokeRect(x, y, cellSize, cellSize);
-
-      if (!coloredCells.has(index)) {
-        ctx.fillStyle = "#29232e";
-        ctx.font = "bold 16px Arial";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText(
-          currentPuzzle.colors.indexOf(key) + 1,
-          x + cellSize / 2,
-          y + cellSize / 2
-        );
-      }
-    });
-  });
-
-  const link = document.createElement("a");
-  link.download = currentPuzzle.id + "-coloring.png";
-  link.href = canvas.toDataURL("image/png");
-  link.click();
-
-  showToast("PNG downloaded!");
+function showArtwork(){
+ showSection("artwork-section");
+ const grid=$("#saved-grid");grid.innerHTML="";
+ let items=[];
+ try{items=JSON.parse(localStorage.getItem("colorstudio-completed"))||[]}catch{}
+ if(!items.length){grid.textContent="Your completed puzzles will appear here.";return;}
+ items.forEach(item=>{
+  const card=document.createElement("div");card.className="saved-card";
+  const image=document.createElement("div");
+  image.style.height="130px";image.style.display="grid";image.style.placeItems="center";image.style.fontSize="65px";image.style.background="#292437";
+  image.textContent=item.mode==="mystery"?"✦":"✿";
+  const info=document.createElement("div");info.textContent=item.title+" · "+item.date;
+  card.append(image,info);grid.append(card);
+ });
 }
 
-// Main navigation
-elements.modeCards.forEach(card => {
-  card.addEventListener("click", () => showGallery(card.dataset.mode));
+function $(s){return document.querySelector(s)}
+function $$(s){return [...document.querySelectorAll(s)]}
+
+// Navigation
+$$(".mode-card").forEach(card=>card.addEventListener("click",()=>enterMode(card.dataset.mode)));
+$("#gallery-back").addEventListener("click",()=>{
+ showSection(null);$(".how-section").classList.remove("hidden");
+ $("#collections").scrollIntoView({behavior:"smooth"});
 });
+$("#filters").querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{
+ filter=b.dataset.filter;
+ $$("#filters button").forEach(x=>x.classList.toggle("active",x===b));
+ renderGallery();
+}));
+$("#studio-back").addEventListener("click",()=>{showSection("gallery-section");});
+$("#finish-back").addEventListener("click",()=>{showSection("gallery-section");});
+$("#undo").addEventListener("click",undo);
+$("#redo").addEventListener("click",redo);
+$("#reset").addEventListener("click",resetPuzzle);
+$("#print").addEventListener("click",createPrint);
+$("#download").addEventListener("click",downloadPNG);
+$("#hint").addEventListener("click",giveHint);
+$("#toggle-numbers").addEventListener("click",toggleNumbers);
+$("#eraser").addEventListener("click",()=>{erasing=true;updatePalette();updateInstruction();toast("Eraser selected.");});
+$("#zoom-in").addEventListener("click",()=>changeZoom(.15));
+$("#zoom-out").addEventListener("click",()=>changeZoom(-.15));
+$("#my-artwork-button").addEventListener("click",showArtwork);
+$("#artwork-back").addEventListener("click",()=>{showSection(null);$("#collections").scrollIntoView({behavior:"smooth"});});
 
-document.querySelector("#back-to-modes").addEventListener("click", () => {
-  elements.gallery.classList.add("hidden");
-  document.querySelector(".mode-section").classList.remove("hidden");
-  document.querySelector(".mode-section").scrollIntoView({ behavior: "smooth" });
-});
-
-document.querySelector("#back-to-gallery").addEventListener("click", () => {
-  elements.playSection.classList.add("hidden");
-  elements.gallery.classList.remove("hidden");
-  elements.gallery.scrollIntoView({ behavior: "smooth" });
-});
-
-document.querySelectorAll(".filter").forEach(button => {
-  button.addEventListener("click", () => {
-    activeFilter = button.dataset.difficulty;
-
-    document.querySelectorAll(".filter").forEach(item => {
-      item.classList.toggle("active", item === button);
-    });
-
-    renderGallery();
-  });
-});
-
-document.querySelector("#reset-puzzle").addEventListener("click", resetPuzzle);
-document.querySelector("#print-puzzle").addEventListener("click", createPrintSheet);
-document.querySelector("#download-puzzle").addEventListener("click", downloadArtwork);
-document.querySelector("#hint-button").addEventListener("click", giveHint);
-document.querySelector("#show-numbers").addEventListener("click", () => toggleNumbers(true));
-document.querySelector("#hide-numbers").addEventListener("click", () => toggleNumbers(false));
-
-document.querySelector("#play-again").addEventListener("click", () => {
-  elements.completion.classList.add("hidden");
-  elements.playSection.classList.add("hidden");
-  elements.gallery.classList.remove("hidden");
-  elements.gallery.scrollIntoView({ behavior: "smooth" });
-});
-
-// Start on the home page.
-console.log("Color Studio is ready!");
+console.log("Color Studio 2.0 loaded.");
