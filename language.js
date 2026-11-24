@@ -55,82 +55,38 @@ const toolTranslations = {
   ]
 };
 
-// Save the original English content before changing anything.
-const originalText = new Map();
-const originalTools = [];
-
-function saveOriginalContent() {
-  document.querySelectorAll("[data-i18n]").forEach(element => {
-    originalText.set(element, element.innerHTML);
-  });
-
-  document.querySelectorAll(".lab-card").forEach(card => {
-    const title = card.querySelector("h3");
-    const description = card.querySelector("p");
-
-    originalTools.push({
-      title: title ? title.innerHTML : null,
-      description: description ? description.innerHTML : null
-    });
-  });
-}
-
 function applyLanguage(language) {
   const selectedLanguage = translations[language] ? language : "en";
 
   document.documentElement.lang = selectedLanguage;
 
-  // Restore the original English content first.
+  // Restore English from the original HTML.
   if (selectedLanguage === "en") {
-    originalText.forEach((originalHTML, element) => {
-      element.innerHTML = originalHTML;
-    });
-
-    document.querySelectorAll(".lab-card").forEach((card, index) => {
-      const title = card.querySelector("h3");
-      const description = card.querySelector("p");
-      const original = originalTools[index];
-
-      if (!original) return;
-
-      if (title && original.title !== null) {
-        title.innerHTML = original.title;
-      }
-
-      if (description && original.description !== null) {
-        description.innerHTML = original.description;
-      }
-    });
-
+    location.reload();
     return;
   }
 
-  // Apply Finnish or Nepali translations.
   document.querySelectorAll("[data-i18n]").forEach(element => {
     const key = element.dataset.i18n;
-    const translatedText = translations[selectedLanguage][key];
+    const translated = translations[selectedLanguage][key];
 
-    if (translatedText !== undefined) {
-      element.innerHTML = translatedText;
+    if (translated !== undefined) {
+      element.textContent = translated;
     }
   });
 
-  const translatedTools = toolTranslations[selectedLanguage];
-
   document.querySelectorAll(".lab-card").forEach((card, index) => {
-    const title = card.querySelector("h3");
-    const description = card.querySelector("p");
-    const translated = translatedTools[index];
+    const translated = toolTranslations[selectedLanguage][index];
 
     if (!translated) return;
+
+    const title = card.querySelector("h3");
+    const description = card.querySelector("p");
 
     if (title) title.textContent = translated[0];
     if (description) description.textContent = translated[1];
   });
 }
-
-// Initialize once.
-saveOriginalContent();
 
 const languageSelect = document.getElementById("languageSelect");
 
@@ -138,7 +94,10 @@ if (languageSelect) {
   const savedLanguage = localStorage.getItem("ayush-language") || "en";
 
   languageSelect.value = savedLanguage;
-  applyLanguage(savedLanguage);
+
+  if (savedLanguage !== "en") {
+    applyLanguage(savedLanguage);
+  }
 
   languageSelect.addEventListener("change", function () {
     const selectedLanguage = this.value;
