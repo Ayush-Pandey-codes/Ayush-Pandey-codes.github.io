@@ -18,6 +18,7 @@ const translations = {
     "contact.description": "Haluatko tehdä yhteistyötä tai vain sanoa hei? Ota yhteyttä!",
     "footer.text": "Suunniteltu ja rakennettu uteliaisuudella."
   },
+
   ne: {
     "nav.about": "मेरो बारेमा",
     "nav.lab": "डिजिटल प्रयोगशाला",
@@ -46,6 +47,7 @@ const toolTranslations = {
     ["Sää", "Tarkista sää ja ennusteet."],
     ["QR Studio", "Luo mukautettuja QR-koodeja ilmaiseksi."]
   ],
+
   ne: [
     ["रङ खेलमैदान", "रङ संयोजनहरू बनाउनुहोस् र अन्वेषण गर्नुहोस्।"],
     ["सानो क्याल्कुलेटर", "दैनिक हिसाबका लागि सरल क्याल्कुलेटर।"],
@@ -55,28 +57,75 @@ const toolTranslations = {
   ]
 };
 
+const originalContent = new Map();
+const originalTools = [];
+
+function saveOriginalContent() {
+  document.querySelectorAll("[data-i18n]").forEach(element => {
+    originalContent.set(element, element.innerHTML);
+  });
+
+  document.querySelectorAll(".lab-card").forEach(card => {
+    const title = card.querySelector("h3");
+    const description = card.querySelector("p");
+
+    originalTools.push({
+      title: title ? title.innerHTML : null,
+      description: description ? description.innerHTML : null
+    });
+  });
+}
+
 function applyLanguage(language) {
-  const selectedLanguage = translations[language] ? language : "en";
+  const selectedLanguage = language;
 
-  document.documentElement.lang = selectedLanguage;
+  // Set the correct HTML language.
+  document.documentElement.lang =
+    selectedLanguage === "gb" ? "en" : selectedLanguage;
 
-  // Restore English from the original HTML.
-  if (selectedLanguage === "en") {
-    location.reload();
+  // Restore original English content.
+  if (selectedLanguage === "gb") {
+    originalContent.forEach((originalHTML, element) => {
+      element.innerHTML = originalHTML;
+    });
+
+    document.querySelectorAll(".lab-card").forEach((card, index) => {
+      const title = card.querySelector("h3");
+      const description = card.querySelector("p");
+      const original = originalTools[index];
+
+      if (!original) return;
+
+      if (title && original.title !== null) {
+        title.innerHTML = original.title;
+      }
+
+      if (description && original.description !== null) {
+        description.innerHTML = original.description;
+      }
+    });
+
     return;
   }
 
+  // Apply Finnish or Nepali translations.
+  const dictionary = translations[selectedLanguage];
+
+  if (!dictionary) return;
+
   document.querySelectorAll("[data-i18n]").forEach(element => {
     const key = element.dataset.i18n;
-    const translated = translations[selectedLanguage][key];
 
-    if (translated !== undefined) {
-      element.textContent = translated;
+    if (dictionary[key] !== undefined) {
+      element.textContent = dictionary[key];
     }
   });
 
+  // Translate Digital Lab cards.
+  const translatedTools = toolTranslations[selectedLanguage];
+
   document.querySelectorAll(".lab-card").forEach((card, index) => {
-    const translated = toolTranslations[selectedLanguage][index];
+    const translated = translatedTools[index];
 
     if (!translated) return;
 
@@ -88,21 +137,26 @@ function applyLanguage(language) {
   });
 }
 
+// Initialize the language system.
+saveOriginalContent();
+
 const languageSelect = document.getElementById("languageSelect");
 
 if (languageSelect) {
-  const savedLanguage = localStorage.getItem("ayush-language") || "en";
+  const savedLanguage =
+    localStorage.getItem("ayush-language") || "gb";
 
   languageSelect.value = savedLanguage;
 
-  if (savedLanguage !== "en") {
-    applyLanguage(savedLanguage);
-  }
+  // Apply saved language on page load.
+  applyLanguage(savedLanguage);
 
+  // Change language immediately when selected.
   languageSelect.addEventListener("change", function () {
     const selectedLanguage = this.value;
 
     localStorage.setItem("ayush-language", selectedLanguage);
+
     applyLanguage(selectedLanguage);
   });
 }
