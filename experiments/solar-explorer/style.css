@@ -605,3 +605,66 @@ footer span {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* =========================================
+   REAL NASA PLANET PHOTOGRAPHS
+========================================= */
+
+.planet-art {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.planet-photo {
+  display: block;
+  width: 150px;
+  height: 150px;
+  object-fit: contain;
+  border-radius: 50%;
+  filter: drop-shadow(0 0 18px rgba(120, 160, 255, 0.22));
+  transition:
+    transform 0.5s ease,
+    filter 0.5s ease;
+}
+
+.planet-card:hover .planet-photo,
+.planet-card.active .planet-photo {
+  transform: scale(1.12) rotate(4deg);
+  filter: drop-shadow(0 0 28px rgba(120, 160, 255, 0.5));
+}
+
+.detail-photo {
+  display: block;
+  width: min(100%, 320px);
+  aspect-ratio: 1;
+  object-fit: contain;
+  border-radius: 50%;
+  margin: auto;
+  filter: drop-shadow(0 0 30px rgba(120, 160, 255, 0.3));
+  animation: planetAppear 0.7s ease;
+}
+
+@keyframes planetAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (max-width: 600px) {
+  .planet-photo {
+    width: 110px;
+    height: 110px;
+  }
+
+  .detail-photo {
+    width: min(100%, 240px);
+  }
+}
