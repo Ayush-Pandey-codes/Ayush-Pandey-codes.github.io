@@ -1,0 +1,225 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#101018">
+  <meta name="description" content="A free digital and printable color-by-number studio.">
+  <title>Color Studio — Color by Number</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="./index.html">
+      <span class="brand-icon">▦</span>
+      <span>COLOR<span class="brand-light">STUDIO</span></span>
+    </a>
+    <nav class="top-nav">
+      <a href="#gallery">Explore</a>
+      <a href="#how-it-works">How to play</a>
+    </nav>
+    <span class="free-label">✦ FREE TO PLAY</span>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-copy">
+        <span class="eyebrow">YOUR LITTLE CREATIVE SPACE</span>
+        <h1>Every number<br>has a <span>colorful story.</span></h1>
+        <p>Relax, pick your colors, and discover the picture hidden inside every puzzle.</p>
+        <a class="primary-button" href="#gallery">Explore puzzles <span>↗</span></a>
+      </div>
+      <div class="hero-art" aria-label="Colorful numbered pixel art">
+        <div class="art-tile tile-one">3</div>
+        <div class="art-tile tile-two">1</div>
+        <div class="art-tile tile-three">4</div>
+        <div class="art-tile tile-four">2</div>
+        <div class="art-tile tile-five">5</div>
+        <div class="art-tile tile-six">1</div>
+        <div class="art-tile tile-seven">4</div>
+        <div class="art-tile tile-eight">2</div>
+        <div class="art-tile tile-nine">3</div>
+      </div>
+    </section>
+
+    <section class="mode-section" id="gallery">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">CHOOSE YOUR EXPERIENCE</span>
+          <h2>How do you want to color?</h2>
+        </div>
+        <p>Two ways to play. Endless little surprises.</p>
+      </div>
+
+      <div class="mode-cards">
+        <button class="mode-card mystery-card" data-mode="mystery">
+          <div class="mode-art mystery-art">
+            <div class="mini-grid" aria-hidden="true">
+              <span>2</span><span>1</span><span>3</span><span>2</span>
+              <span>1</span><span>3</span><span>2</span><span>1</span>
+              <span>3</span><span>2</span><span>1</span><span>3</span>
+              <span>2</span><span>1</span><span>3</span><span>2</span>
+            </div>
+            <span class="art-question">?</span>
+          </div>
+          <div class="mode-card-copy">
+            <span class="mode-tag">THE SURPRISE MODE</span>
+            <h3>Mystery Color</h3>
+            <p>Color the numbered squares and uncover a hidden picture. No spoilers!</p>
+            <span class="text-link">Explore mystery puzzles ↗</span>
+          </div>
+        </button>
+
+        <button class="mode-card classic-card" data-mode="classic">
+          <div class="mode-art classic-art">
+            <div class="classic-flower" aria-hidden="true">✿</div>
+            <span class="flower-number">1 · 2 · 3</span>
+          </div>
+          <div class="mode-card-copy">
+            <span class="mode-tag">THE CLASSIC EXPERIENCE</span>
+            <h3>Classic Color</h3>
+            <p>Choose an illustration, match the numbers, and bring it to life.</p>
+            <span class="text-link">Explore coloring pages ↗</span>
+          </div>
+        </button>
+      </div>
+    </section>
+
+    <section class="gallery-section hidden" id="puzzle-gallery">
+      <div class="section-heading gallery-heading">
+        <div>
+          <span class="eyebrow" id="gallery-eyebrow">MYSTERY COLLECTION</span>
+          <h2 id="gallery-title">Choose a puzzle</h2>
+        </div>
+        <button class="subtle-button" id="back-to-modes">← All modes</button>
+      </div>
+      <div class="filter-row" id="difficulty-filters">
+        <button class="filter active" data-difficulty="all">All</button>
+        <button class="filter" data-difficulty="easy">Easy</button>
+        <button class="filter" data-difficulty="medium">Medium</button>
+        <button class="filter" data-difficulty="hard">Hard</button>
+      </div>
+      <div class="puzzle-grid" id="puzzle-grid"></div>
+    </section>
+
+    <section class="play-section hidden" id="play-section">
+      <div class="play-header">
+        <button class="subtle-button" id="back-to-gallery">← Back to puzzles</button>
+        <div class="play-title">
+          <span class="eyebrow" id="play-mode-label">MYSTERY COLOR</span>
+          <h2 id="play-title">Hidden picture</h2>
+        </div>
+        <div class="play-actions">
+          <button class="subtle-button" id="reset-puzzle">↻ Reset</button>
+          <button class="subtle-button" id="print-puzzle">⎙ Print</button>
+          <button class="subtle-button" id="download-puzzle">↓ PNG</button>
+        </div>
+      </div>
+
+      <div class="game-layout">
+        <aside class="game-sidebar">
+          <div class="progress-card">
+            <div class="progress-top">
+              <span>YOUR PROGRESS</span>
+              <strong id="progress-text">0%</strong>
+            </div>
+            <div class="progress-track"><div id="progress-bar"></div></div>
+            <p id="progress-caption">Let's get coloring!</p>
+          </div>
+
+          <div class="palette-card">
+            <div class="palette-heading">
+              <div>
+                <span class="eyebrow">COLOR PALETTE</span>
+                <h3>Pick a number</h3>
+              </div>
+              <span class="selected-number" id="selected-number">1</span>
+            </div>
+            <div class="palette-list" id="palette-list"></div>
+            <p class="palette-help">Choose a color, then click the matching numbered areas.</p>
+          </div>
+
+          <div class="tools-card">
+            <span class="eyebrow">YOUR TOOLS</span>
+            <button class="tool-button" id="hint-button">✦ Give me a hint</button>
+            <button class="tool-button" id="show-numbers"># Show numbers</button>
+            <button class="tool-button" id="hide-numbers">◉ Hide numbers</button>
+          </div>
+
+          <div class="print-tip">
+            <span>✎</span>
+            <div>
+              <strong>Love paper coloring?</strong>
+              <p>Print the puzzle and color it with your favorite pencils or markers.</p>
+            </div>
+          </div>
+        </aside>
+
+        <div class="canvas-panel">
+          <div class="canvas-topline">
+            <span id="canvas-instruction">Select color 1 to begin</span>
+            <span id="canvas-size-label">10 × 10 GRID</span>
+          </div>
+          <div class="artwork-frame">
+            <div id="artwork" class="artwork" aria-label="Coloring puzzle"></div>
+            <div class="completion-overlay hidden" id="completion-overlay">
+              <div class="completion-content">
+                <span class="completion-sparkle">✦</span>
+                <span class="eyebrow">PUZZLE COMPLETED</span>
+                <h2 id="completion-title">You revealed it!</h2>
+                <p id="completion-message">Beautiful work. You did it!</p>
+                <button class="primary-button" id="play-again">Choose another puzzle ↗</button>
+              </div>
+            </div>
+          </div>
+          <div class="canvas-footer">
+            <span>Made with creativity ✦</span>
+            <span id="remaining-label">0 colored</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="how-section" id="how-it-works">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">SIMPLE AND RELAXING</span>
+          <h2>How to play</h2>
+        </div>
+      </div>
+      <div class="steps-grid">
+        <article class="step-card">
+          <span class="step-number">01</span>
+          <div class="step-icon">▦</div>
+          <h3>Choose a puzzle</h3>
+          <p>Pick a mystery grid or a classic coloring illustration.</p>
+        </article>
+        <article class="step-card">
+          <span class="step-number">02</span>
+          <div class="step-icon">◉</div>
+          <h3>Match the numbers</h3>
+          <p>Select a color from the palette and find its matching numbers.</p>
+        </article>
+        <article class="step-card">
+          <span class="step-number">03</span>
+          <div class="step-icon">✦</div>
+          <h3>Reveal the art</h3>
+          <p>Fill every section, enjoy the reveal, or print and color offline.</p>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <a class="brand" href="./index.html"><span class="brand-icon">▦</span> COLOR<span class="brand-light">STUDIO</span></a>
+    <span>A little color goes a long way. ✦</span>
+  </footer>
+
+  <div class="toast" id="toast" role="status"></div>
+  <script src="./script.js"></script>
+</body>
+</html>
