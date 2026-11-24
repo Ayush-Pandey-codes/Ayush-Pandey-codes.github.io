@@ -1,0 +1,111 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#070b18">
+  <meta name="description" content="Explore the Solar System and discover all eight planets.">
+  <title>Solar Explorer — Journey Through Space</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <div class="stars" aria-hidden="true"></div>
+
+  <header class="navbar">
+    <a class="brand" href="./index.html">
+      <span class="brand-icon">✦</span>
+      SOLAR<span>EXPLORER</span>
+    </a>
+    <a class="back-link" href="../../index.html">← Back to Digital Lab</a>
+  </header>
+
+  <main>
+    <section class="hero">
+      <p class="eyebrow">✦ YOUR JOURNEY STARTS HERE</p>
+      <h1>Explore the <span>Solar System</span></h1>
+      <p class="hero-text">
+        Eight planets. One star. Endless wonders.
+        Discover the incredible world beyond Earth.
+      </p>
+      <a href="#planets" class="explore-button">Start exploring <span>↓</span></a>
+      <div class="hero-stats">
+        <div><strong>8</strong><span>PLANETS</span></div>
+        <div><strong>1</strong><span>STAR</span></div>
+        <div><strong>4.6B</strong><span>YEARS OLD</span></div>
+      </div>
+    </section>
+
+    <section class="solar-section" aria-label="Illustration of the solar system">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">OUR COSMIC NEIGHBORHOOD</p>
+          <h2>The Solar System</h2>
+        </div>
+        <span class="planet-count">8 PLANETS</span>
+      </div>
+
+      <div class="solar-visual">
+        <div class="sun"></div>
+        <div class="orbit orbit-1"><span class="planet mercury"></span></div>
+        <div class="orbit orbit-2"><span class="planet venus"></span></div>
+        <div class="orbit orbit-3"><span class="planet earth"></span></div>
+        <div class="orbit orbit-4"><span class="planet mars"></span></div>
+        <div class="orbit orbit-5"><span class="planet jupiter"></span></div>
+        <div class="orbit orbit-6"><span class="planet saturn"></span></div>
+        <div class="orbit orbit-7"><span class="planet uranus"></span></div>
+        <div class="orbit orbit-8"><span class="planet neptune"></span></div>
+      </div>
+      <p class="visual-note">Illustrative orbital view · Not to scale</p>
+    </section>
+
+    <section class="planets-section" id="planets">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">MEET OUR PLANETS</p>
+          <h2>Choose your destination</h2>
+        </div>
+        <p class="section-hint">Select a planet to explore it</p>
+      </div>
+
+      <div class="planet-grid" id="planetGrid"></div>
+
+      <article class="planet-details" id="planetDetails" aria-live="polite">
+        <div class="detail-visual" id="detailVisual">
+          <span class="detail-planet mercury"></span>
+        </div>
+        <div class="detail-content">
+          <p class="eyebrow">YOUR DESTINATION</p>
+          <h3 id="detailName">Mercury</h3>
+          <p id="detailDescription"></p>
+          <div class="detail-stats">
+            <div><span>TYPE</span><strong id="detailType"></strong></div>
+            <div><span>DAY LENGTH</span><strong id="detailDay"></strong></div>
+            <div><span>YEAR LENGTH</span><strong id="detailYear"></strong></div>
+            <div><span>MOONS</span><strong id="detailMoons"></strong></div>
+          </div>
+          <p class="detail-fact" id="detailFact"></p>
+        </div>
+      </article>
+    </section>
+
+    <section class="fact-section">
+      <p class="eyebrow">DID YOU KNOW?</p>
+      <h2>A universe of <span>surprises</span></h2>
+      <p id="randomFact" aria-live="polite">The Solar System is full of amazing discoveries.</p>
+      <button id="factButton" class="explore-button" type="button">Discover a fact ✦</button>
+    </section>
+  </main>
+
+  <footer>
+    <p>Made with curiosity <span>✦</span> Exploring our cosmic neighborhood</p>
+  </footer>
+
+  <script src="./script.js"></script>
+</body>
+</html>
