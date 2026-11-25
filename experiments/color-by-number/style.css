@@ -201,3 +201,61 @@ h1 em,h2 em{font-style:normal;color:var(--accent)}
  .swatch{width:15px;height:15px;border:1px solid #777;display:inline-block}
  .print-output svg{width:150mm;height:150mm;display:block;margin:8mm auto}
 }
+/* =========================================
+   COLOR STUDIO — POLISH & ACCESSIBILITY
+========================================= */
+
+/* Smooth interactions */
+button,
+.mode-card,
+.artwork-card,
+select,
+input {
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease,
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    opacity 180ms ease;
+}
+
+/* Clear keyboard focus */
+button:focus-visible,
+.mode-card:focus-visible,
+.artwork-card:focus-visible,
+select:focus-visible,
+input:focus-visible {
+  outline: 3px solid #a78bfa;
+  outline-offset: 4px;
+}
+
+/* Gentle button hover */
+button:not(:disabled):hover {
+  transform: translateY(-1px);
+}
+
+/* Make disabled controls clearly disabled */
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Cleaner text selection */
+::selection {
+  background: rgba(167, 139, 250, 0.35);
+  color: #ffffff;
+}
+
+/* Respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
