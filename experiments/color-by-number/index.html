@@ -1,377 +1,128 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#101014">
-  <meta name="description" content="A beautiful free pixel and classic color-by-number studio.">
-  <title>Color Studio — Pixel Art Coloring</title>
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-  <link rel="stylesheet" href="./style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Color Studio</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
-
 <body>
-<div class="app-shell">
 
-  <header class="topbar">
-    <a class="brand" href="#" id="home-link">
-      <span class="brand-mark">▦</span>
-      <span>COLOR<span class="brand-light">STUDIO</span></span>
-    </a>
+  <header class="app-header">
+    <div class="brand">
+      <div class="brand-icon">🎨</div>
+      <div>
+        <h1>Color Studio</h1>
+        <p>Relaxing coloring studio for every skill level</p>
+      </div>
+    </div>
 
-    <nav class="top-nav">
-      <button class="nav-link active" data-view="home">Explore</button>
-      <button class="nav-link" data-view="my-art">
-        My artwork <span id="saved-count">0</span>
-      </button>
+    <nav class="mode-tabs">
+      <button class="mode-tab active" data-mode="easy">Easy Pixel</button>
+      <button class="mode-tab" data-mode="advanced">Advanced Pixel Art</button>
+      <button class="mode-tab" data-mode="classic">Classic Illustrated</button>
     </nav>
-
-    <button class="icon-button" id="theme-toggle"
-      aria-label="Toggle theme" title="Toggle theme">◐</button>
   </header>
 
-  <main>
+  <main class="app-main">
 
-    <!-- HERO -->
-    <section class="hero" id="home-hero">
-      <div class="hero-copy">
-        <div class="eyebrow">
-          <span class="live-dot"></span> YOUR CREATIVE SPACE
-        </div>
-
-        <h1>Color a little.<br><em>Unwind a lot.</em></h1>
-
-        <p>
-          A calm, modern coloring studio. Discover hidden pixel art
-          or bring detailed illustrations to life, one color at a time.
-        </p>
-
-        <div class="hero-actions">
-          <button class="primary-button" id="start-exploring">
-            Explore collection <span>↗</span>
-          </button>
-          <span class="hero-note">FREE · NO ACCOUNT</span>
+    <section class="gallery-section">
+      <div class="section-head">
+        <h2>Choose an artwork</h2>
+        <div class="gallery-filters">
+          <button class="filter-btn active" data-filter="all">All</button>
+          <button class="filter-btn" data-filter="easy">Easy</button>
+          <button class="filter-btn" data-filter="advanced">Advanced</button>
+          <button class="filter-btn" data-filter="classic">Classic</button>
         </div>
       </div>
 
-      <div class="hero-art">
-        <div class="hero-art-label">PIXEL STUDY / 001</div>
-        <div class="hero-pixel-art" id="hero-pixels" aria-hidden="true"></div>
-        <div class="hero-art-footer">
-          <span>40 × 40 PIXELS</span>
-          <span>COLOR / REVEAL</span>
-        </div>
-      </div>
+      <div class="gallery" id="gallery"></div>
     </section>
 
-    <!-- MODE SELECTION -->
-    <section class="mode-section" id="mode-section">
-      <div class="section-heading">
-        <div>
-          <div class="eyebrow">CHOOSE YOUR EXPERIENCE</div>
-          <h2>How do you want to color?</h2>
-        </div>
-        <span class="section-index">01 / 03</span>
-      </div>
-
-      <div class="mode-grid">
-
-        <button class="mode-card mystery-card" data-mode="mystery">
-          <div class="mode-card-top">
-            <span class="mode-tag">01 — REVEAL</span>
-            <span class="round-arrow">↗</span>
+    <section class="studio-section hidden" id="studio">
+      <div class="studio-top">
+        <button class="back-btn" id="backBtn">← Back to gallery</button>
+        <h2 id="artworkTitle">Artwork</h2>
+        <div class="progress-wrap">
+          <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
           </div>
-
-          <div class="mode-visual mystery-visual">
-            <div class="mini-grid" aria-hidden="true">
-              <i></i><i></i><i></i><i></i>
-              <i></i><i></i><i></i><i></i>
-              <i></i><i></i><i></i><i></i>
-              <i></i><i></i><i></i><i></i>
-            </div>
-          </div>
-
-          <h3>Mystery pixel</h3>
-          <p>Follow the numbers and uncover a hidden picture, pixel by pixel.</p>
-
-          <div class="mode-card-bottom">
-            <span>PIXEL ART</span><span>START →</span>
-          </div>
-        </button>
-
-        <button class="mode-card classic-card" data-mode="classic">
-          <div class="mode-card-top">
-            <span class="mode-tag">02 — ILLUSTRATE</span>
-            <span class="round-arrow">↗</span>
-          </div>
-
-          <div class="mode-visual classic-visual">
-            <span class="classic-symbol">✳</span>
-            <span class="classic-symbol small">✧</span>
-            <span class="classic-symbol tiny">·</span>
-          </div>
-
-          <h3>Classic coloring</h3>
-          <p>Color outlined regions in carefully composed illustrations.</p>
-
-          <div class="mode-card-bottom">
-            <span>LINE ART</span><span>START →</span>
-          </div>
-        </button>
-
-      </div>
-    </section>
-
-    <!-- GALLERY -->
-    <section class="gallery-section hidden" id="gallery-section">
-      <div class="gallery-header">
-
-        <button class="back-link" id="gallery-back">
-          ← Back to studio
-        </button>
-
-        <div class="eyebrow" id="gallery-label">THE COLLECTION</div>
-        <h2 id="gallery-title">Mystery puzzles</h2>
-        <p>Choose a piece and make it yours.</p>
-
-        <div class="filter-row" id="filters">
-          <button class="filter-button active" data-filter="all">All</button>
-          <button class="filter-button" data-filter="easy">Easy</button>
-          <button class="filter-button" data-filter="medium">Medium</button>
-          <button class="filter-button" data-filter="advanced">Advanced</button>
+          <span id="progressText">0% complete</span>
         </div>
-
-      </div>
-
-      <div class="puzzle-grid" id="puzzle-grid"></div>
-    </section>
-
-    <!-- COLORING STUDIO -->
-    <section class="studio hidden" id="studio">
-
-      <div class="studio-heading">
-        <button class="back-link" id="studio-back">← Collection</button>
-
-        <div class="studio-title-wrap">
-          <div class="eyebrow" id="studio-mode">PIXEL MYSTERY</div>
-          <h2 id="studio-title">Artwork</h2>
-        </div>
-
-        <div class="studio-heading-actions">
-          <button class="small-button" id="undo" title="Undo" aria-label="Undo">↶</button>
-          <button class="small-button" id="redo" title="Redo" aria-label="Redo">↷</button>
-          <button class="small-button" id="reset" title="Reset puzzle">Reset</button>
-        </div>
-      </div>
-
-      <!-- PROGRESS -->
-      <div class="progress-panel">
-        <div class="progress-top">
-          <span id="cell-count">0 / 0 areas colored</span>
-          <strong id="progress-value">0%</strong>
-        </div>
-
-        <div class="progress-track">
-          <div id="progress-fill"></div>
-        </div>
-
-        <p id="progress-caption">Every color brings you closer.</p>
       </div>
 
       <div class="studio-layout">
 
-        <!-- COLOR PALETTE -->
         <aside class="palette-panel">
+          <h3>Colors</h3>
+          <div class="palette" id="palette"></div>
 
-          <div class="panel-label">
-            COLOR PALETTE
-            <span id="current-number">1</span>
+          <div class="palette-actions">
+            <button class="small-btn" id="autoNextBtn">Auto-select next</button>
+            <button class="small-btn" id="nextUnfinishedBtn">Next unfinished</button>
+            <button class="small-btn danger" id="clearSelectionBtn">Clear selection</button>
           </div>
-
-          <p class="panel-hint">
-            Select a number, then find matching areas.
-          </p>
-
-          <div class="palette-list" id="palette"></div>
-
-          <!-- COLORING TOOLS -->
-          <div class="palette-tools">
-
-            <button class="tool-button" id="eraser">
-              ⌫ <span>Eraser</span>
-            </button>
-
-            <button class="tool-button" id="toggle-numbers">
-              № <span>Numbers</span>
-            </button>
-
-            <button class="tool-button" id="fill-color">
-              ▦ <span>Fill color</span>
-            </button>
-
-            <button class="tool-button" id="highlight-color" aria-pressed="false">
-              ✦ <span>Highlight color</span>
-            </button>
-
-            <button class="tool-button" id="toggle-grid" aria-pressed="false">
-              ▤ <span>Grid lines</span>
-            </button>
-
-            <button class="tool-button" id="auto-next" aria-pressed="false">
-              ⇢ <span>Auto next</span>
-            </button>
-
-            <button class="tool-button" id="next-color">
-              → <span>Next color</span>
-            </button>
-
-            <button class="tool-button" id="clear-color">
-              ✕ <span>Clear color</span>
-            </button>
-
-          </div>
-
-          <!-- HINT -->
-          <div class="hint-card">
-            <span>✦</span>
-            <div>
-              <strong>Need a clue?</strong>
-              <p>Get a hint for your next move.</p>
-              <button id="hint">Reveal hint ↗</button>
-            </div>
-          </div>
-
         </aside>
 
-        <!-- WORKSPACE -->
-        <div class="workspace">
-
-          <div class="workspace-toolbar">
-            <span id="workspace-type">PIXEL MYSTERY GRID</span>
-
-            <div class="zoom-tools">
-              <button id="zoom-out" aria-label="Zoom out">−</button>
-              <span id="zoom-label">100%</span>
-              <button id="zoom-in" aria-label="Zoom in">+</button>
-            </div>
+        <div class="canvas-panel">
+          <div class="canvas-tools">
+            <button class="tool-btn active" data-tool="brush" title="Color brush">🖌️ Brush</button>
+            <button class="tool-btn" data-tool="eraser" title="Eraser">🧽 Eraser</button>
+            <button class="tool-btn" data-tool="fill" title="Fill area">🪣 Fill</button>
+            <button class="tool-btn" id="undoBtn" title="Undo">↩️ Undo</button>
+            <button class="tool-btn" id="redoBtn" title="Redo">↪️ Redo</button>
+            <button class="tool-btn" id="hintBtn" title="Reveal one cell">💡 Hint</button>
           </div>
 
-          <p class="workspace-instruction" id="workspace-instruction">
-            Select a color and find matching areas.
-          </p>
-
-          <div class="canvas-viewport" id="canvas-viewport">
-            <div id="canvas-content"></div>
+          <div class="canvas-view">
+            <div class="pixel-canvas" id="pixelCanvas"></div>
           </div>
 
-          <div class="workspace-footer">
-            <span>YOUR CANVAS</span>
-            <span>PROGRESS SAVES AUTOMATICALLY</span>
+          <div class="canvas-footer">
+            <button class="small-btn" id="zoomOutBtn">− Zoom out</button>
+            <span id="zoomLabel">100%</span>
+            <button class="small-btn" id="zoomInBtn">+ Zoom in</button>
+            <button class="small-btn" id="resetBtn">Reset artwork</button>
+          </div>
+        </div>
+
+        <aside class="settings-panel">
+          <h3>View & export</h3>
+
+          <label class="toggle-row">
+            <input type="checkbox" id="showNumbers" checked />
+            <span>Show color numbers</span>
+          </label>
+
+          <label class="toggle-row">
+            <input type="checkbox" id="showGrid" checked />
+            <span>Show pixel grid</span>
+          </label>
+
+          <label class="toggle-row">
+            <input type="checkbox" id="highlightColor" checked />
+            <span>Highlight selected color</span>
+          </label>
+
+          <div class="export-actions">
+            <button class="primary-btn" id="exportBtn">Export PNG</button>
+            <button class="secondary-btn" id="printBtn">Print</button>
           </div>
 
-        </div>
-      </div>
-
-      <!-- EXPORT AND PRINT -->
-      <div class="studio-bottom-actions">
-        <button class="secondary-button" id="print">
-          Print puzzle + key
-        </button>
-
-        <button class="secondary-button" id="download">
-          Export PNG
-        </button>
-
-        <button class="primary-button" id="finish-next">
-          Back to collection <span>↗</span>
-        </button>
-      </div>
-
-      <!-- COMPLETION -->
-      <div class="completion hidden" id="completion">
-        <div class="completion-icon">✦</div>
-        <div class="eyebrow">PIECE COMPLETE</div>
-
-        <h2 id="completion-title">Beautifully finished.</h2>
-
-        <p id="completion-text">Your artwork is ready.</p>
-
-        <button class="primary-button" id="finish-download">
-          Save artwork <span>↓</span>
-        </button>
-      </div>
-
-    </section>
-
-    <!-- MY ARTWORK -->
-    <section class="artwork-section hidden" id="artwork-section">
-
-      <div class="gallery-header">
-        <button class="back-link" id="artwork-back">
-          ← Back to studio
-        </button>
-
-        <div class="eyebrow">YOUR PERSONAL COLLECTION</div>
-        <h2>My artwork</h2>
-        <p>Pieces you've completed in this browser.</p>
-      </div>
-
-      <div class="saved-grid" id="saved-grid"></div>
-
-    </section>
-
-    <!-- HOW IT WORKS -->
-    <section class="how-section" id="how-section">
-
-      <div class="section-heading">
-        <div>
-          <div class="eyebrow">A MOMENT FOR YOURSELF</div>
-          <h2>Simple to begin.<br><em>Satisfying to finish.</em></h2>
-        </div>
-
-        <span class="section-index">03 / 03</span>
-      </div>
-
-      <div class="how-grid">
-
-        <div>
-          <span>01</span>
-          <h3>Choose a piece</h3>
-          <p>Pick a hidden pixel picture or a classic illustration.</p>
-        </div>
-
-        <div>
-          <span>02</span>
-          <h3>Find your color</h3>
-          <p>Choose a number and fill every matching area.</p>
-        </div>
-
-        <div>
-          <span>03</span>
-          <h3>Make it yours</h3>
-          <p>Save your artwork or print a puzzle to color offline.</p>
-        </div>
+          <div class="saved-section">
+            <h3>Saved artwork</h3>
+            <div class="saved-list" id="savedList"></div>
+          </div>
+        </aside>
 
       </div>
     </section>
 
   </main>
 
-  <footer class="footer">
-    <span>COLOR STUDIO</span>
-    <span>MADE FOR SLOW MOMENTS · <span id="year"></span></span>
-  </footer>
+  <div class="toast" id="toast"></div>
 
-</div>
-
-<div class="toast" id="toast" role="status" aria-live="polite"></div>
-
-<script src="./script.js"></script>
-
+  <script src="script.js"></script>
 </body>
 </html>
