@@ -259,3 +259,83 @@ button:disabled {
     scroll-behavior: auto !important;
   }
 }
+
+/* =========================================
+   ADVANCED COLOR STUDIO TOOLS
+========================================= */
+
+/* Highlight selected color */
+.pixel-cell.color-highlight {
+  background: #ffe18a !important;
+  outline: 2px solid #e7a82c;
+  outline-offset: -2px;
+  z-index: 2;
+  animation: colorPulse 1.3s infinite alternate;
+}
+
+@keyframes colorPulse {
+  from { opacity: .65; }
+  to { opacity: 1; }
+}
+
+.region.color-highlight {
+  fill: #ffe18a !important;
+  stroke: #b88724;
+  stroke-width: 4;
+}
+
+/* Pixel grid toggle */
+.pixel-grid.show-grid {
+  gap: 2px;
+  background: #77717f;
+  padding: 2px;
+}
+
+.pixel-grid.show-grid .pixel-cell {
+  border: 1px solid #aaa4b5;
+}
+
+/* Active advanced tools */
+.tool-button.active {
+  background: #c5a7ff20;
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* Completed palette colors */
+.palette-choice.completed {
+  border-color: var(--green);
+}
+
+.palette-choice.completed::after {
+  content: "✓";
+  color: var(--green);
+  font-weight: bold;
+}
+
+/* Better workspace interaction */
+.pixel-cell {
+  transition: background-color .15s, outline .15s;
+}
+
+.region {
+  transition: fill .15s, stroke .15s;
+}
+
+/* Empty gallery message */
+.empty-gallery {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 55px 20px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  color: var(--muted);
+}
+
+/* Accessibility */
+.tool-button:focus-visible,
+.palette-choice:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
